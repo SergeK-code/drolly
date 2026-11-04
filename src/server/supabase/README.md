@@ -4,7 +4,7 @@
 
 `database.types.ts` describes the schema. Import this folder only from `src/server`.
 
-There is **no** service-role client in this phase. Do not add one for ordinary queries. If Phase 3 needs a privileged admin-provisioning operation, put it in its own server-only module with a narrow export.
+There is **no** service-role client. Ordinary auth uses the request-scoped anon client. Admins are promoted with SQL, see `docs/07_MANUAL_ADMIN_PROVISIONING.md`.
 
 Not allowed:
 

@@ -21,7 +21,9 @@ The browser never uses a Supabase client. UI code calls this app's `/api/**` rou
 
 3. Open [http://localhost:3000](http://localhost:3000). Health check: [http://localhost:3000/api/health](http://localhost:3000/api/health). Without a configured database it returns `{ "success": true, "data": { "status": "degraded" } }` and never includes secrets.
 
-4. Database (needs Docker): see [supabase/README.md](supabase/README.md).
+4. Database: apply the migration in the Supabase SQL editor (or `npm run db:reset` if you use local Docker). See [supabase/README.md](supabase/README.md).
+
+5. Auth: register and sign in at `/sign-up` and `/sign-in`. Sessions are httpOnly cookies. JSON never includes access or refresh tokens. Admins are created only with [docs/07_MANUAL_ADMIN_PROVISIONING.md](docs/07_MANUAL_ADMIN_PROVISIONING.md).
 
    ```bash
    npm run db:start

@@ -1,20 +1,47 @@
 # 07 — Manual Admin Provisioning Runbook
 
-There is no public admin registration endpoint or admin signup form.
+There is no public admin registration endpoint or admin signup form. Public
+`POST /api/auth/register` always creates a **customer**.
 
-Recommended first-admin procedure:
-1. A trusted project owner creates the account using the Supabase Auth dashboard or a controlled administrative operation.
-2. The owner verifies the identity through the intended process.
-3. A privileged, server-only provisioning operation assigns the `admin` role in `profiles`.
-4. The operation logs the actor, target user ID and timestamp without logging credentials or tokens.
-5. The operator verifies the user can access the admin dashboard and that an ordinary customer cannot.
+## Who can run this
 
-Implementation constraints:
+Only a trusted project owner with access to the Supabase SQL editor (or another
+operator connection where `auth.uid()` is null). Do not give this to ordinary
+admins through the storefront.
+
+## Promote a user
+
+1. The person registers normally (customer) or you create them in Authentication.
+2. Confirm the Auth user id (`auth.users.id` / `profiles.id`).
+3. In the SQL editor, run:
+
+```sql
+update public.profiles
+set role_id = (select id from public.app_roles where code = 'admin')
+where id = '<auth-user-uuid>';
+```
+
+The `profiles` trigger allows this because the SQL editor has no `auth.uid()`.
+A logged-in customer or admin **cannot** change `role_id` through the API.
+
+4. Log (outside the app) who ran it, the target user id, and the time. Do not
+   log passwords or tokens.
+5. Sign in as that user and open `/admin`. Sign in as a customer and confirm
+   `/admin` redirects away and `GET /api/admin/me` returns 403.
+
+## Revoke admin
+
+```sql
+update public.profiles
+set role_id = (select id from public.app_roles where code = 'customer')
+where id = '<auth-user-uuid>';
+```
+
+Then ask the person to sign out and sign in again.
+
+## Constraints
+
 - Never accept a target role from a public request.
-- Never expose the service-role key to a browser or commit it.
-- Do not create a general-purpose public "make admin" endpoint.
-- Keep the privileged operation out of ordinary customer request flows.
-- Prefer a one-off CLI/server-side administrative script or a tightly controlled operator-only function.
-- Document who can run it and how to revoke admin access.
-
-The exact implementation should be chosen in Phase 3 and reviewed before production use.
+- Never expose `SUPABASE_SERVICE_ROLE_KEY` to the browser or commit it.
+- Do not add a “make admin” API or signup page.
+- Do not use the service-role key for ordinary register/sign-in.

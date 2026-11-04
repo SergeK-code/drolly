@@ -464,22 +464,13 @@ create policy customer_addresses_delete_own
   to authenticated
   using (user_id = auth.uid());
 
--- Orders: customer reads/creates own pending COD orders; admin reads/updates.
+-- Orders: customers read their own rows. Inserts happen later via a
+-- server-side checkout function, not a customer INSERT policy.
 create policy orders_select_own_or_admin
   on public.orders
   for select
   to authenticated
   using (user_id = auth.uid() or public.is_admin());
-
--- create policy orders_insert_own_pending
---   on public.orders
---   for insert
---   to authenticated
---   with check (
---     user_id = auth.uid()
---     and payment_method = 'cash_on_delivery'
---     and status_id = (select id from public.order_statuses where code = 'pending')
---   );
 
 create policy orders_update_admin
   on public.orders
@@ -500,20 +491,6 @@ create policy order_items_select_own_or_admin
         and (orders.user_id = auth.uid() or public.is_admin())
     )
   );
-
--- create policy order_items_insert_own_or_admin
---   on public.order_items
---   for insert
---   to authenticated
---   with check (
---     public.is_admin()
---     or exists (
---       select 1
---       from public.orders as orders
---       where orders.id = order_items.order_id
---         and orders.user_id = auth.uid()
---     )
---   );
 
 -- Store settings: anyone may read the singleton; only admin may update it.
 create policy store_settings_select_public

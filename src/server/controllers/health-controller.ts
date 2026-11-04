@@ -1,3 +1,5 @@
+import "server-only";
+
 import { jsonSuccess } from "@/server/http/json";
 import { getHealth } from "@/server/services/health-service";
 

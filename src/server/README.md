@@ -12,4 +12,6 @@ Rules:
 
 Request flow: Route Handler → controller → service → repository → `createSupabaseServerClient()`.
 
+Auth helpers: `getCurrentUser`, `requireAuthenticatedUser`, `requireAdmin` (see `src/server/auth/`). Admin APIs must call `requireAdminFromSession`, not only hide UI.
+
 Every Route Handler should use `apiHandler` so errors share one formatter and a request ID.
