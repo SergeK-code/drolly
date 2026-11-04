@@ -1,0 +1,18 @@
+---
+description: TypeScript, React, testing and maintainability conventions
+alwaysApply: true
+---
+# Code quality
+
+- TypeScript strict mode; avoid `any`. Use `unknown` and narrow safely.
+- Prefer small named functions and explicit types.
+- Keep UI components focused on presentation and interaction.
+- TanStack Query owns remote/API data; Zustand owns cart and small client-only UI state.
+- Do not duplicate server state in Zustand.
+- Use server pagination; never load the entire catalog to filter in the browser.
+- Include loading, empty, error and success states.
+- Use semantic accessible HTML and keyboard-operable controls.
+- Add tests for business rules, validation, authorization and critical API behavior.
+- Do not claim tests/build/lint passed unless the command was executed.
+- After a phase run lint, typecheck and relevant tests; report exact results.
+- Avoid unnecessary dependencies, premature abstractions and unrelated refactors.

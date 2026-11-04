@@ -1,0 +1,21 @@
+---
+description: Security, authorization and input validation requirements
+alwaysApply: true
+---
+# Security rules
+
+- Validate every incoming body, query parameter and path parameter with Zod on the server.
+- Client validation is for usability only; server validation is mandatory.
+- Never trust client-supplied user ID, role, price, totals, stock, order status or permissions.
+- Determine identity from the server-side session.
+- Resolve role from trusted database data; public registration always creates a customer.
+- Every admin API/service independently verifies admin role.
+- RLS must be enabled on application tables and tested.
+- Customers may access only their own profile, addresses and orders.
+- Public catalog reads return active items only.
+- Do not expose raw database errors, stack traces, secrets or tokens.
+- Use safe, generic messages for unexpected errors.
+- Rate-limit authentication and sensitive operations.
+- Never log passwords, cookies, tokens, service keys, full request bodies or unnecessary personal data.
+- Cookie-based mutations must have appropriate origin/CSRF protections.
+- Checkout must re-read authoritative prices and stock, calculate totals server-side and use an atomic transaction.

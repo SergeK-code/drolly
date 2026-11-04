@@ -1,0 +1,26 @@
+Before implementing this phase, read and follow these project documents:
+
+- `@docs/architecture/SYSTEM_ARCHITECTURE.md`
+- `@docs/architecture/DATABASE_SCHEMA.md`
+- `@docs/architecture/ORDER_AND_DELIVERY_WORKFLOWS.md`
+- `@docs/implementation/IMPLEMENTATION_ROADMAP.md`
+- `@.cursor/skills/delivery-marketplace/SKILL.md`
+- `@.cursor/skills/marketplace-ui/SKILL.md`
+
+Also follow all applicable rules inside `.cursor/rules/`.
+
+We are currently working on **Phase [X]: [PHASE NAME]**.
+
+Before making changes:
+
+1. Inspect the existing project structure and relevant code.
+2. Read the corresponding phase in the implementation roadmap.
+3. Identify the architecture documents and sections relevant to this phase.
+4. Check existing database migrations and implementations.
+5. Identify dependencies, security concerns, and possible conflicts.
+6. Explain your proposed implementation approach.
+7. Identify any architectural decisions that are unclear or contradictory.
+
+Do not modify files yet.
+
+Wait for my approval before implementation.

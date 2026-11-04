@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Drolly
 
-## Getting Started
+Single-store e-commerce app for a software engineering course. Customers browse a catalog, keep a local cart, and place cash-on-delivery orders. Admins manage products, orders and store settings.
 
-First, run the development server:
+The browser never uses a Supabase client. UI code calls this app's `/api/**` routes. Only modules under `src/server` may import `@supabase/ssr` or `@supabase/supabase-js`.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Copy environment placeholders and fill in local values. Do not commit `.env.local`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```bash
+   cp .env.example .env.local
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies and start the app:
 
-## Learn More
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. Open [http://localhost:3000](http://localhost:3000). Health check: [http://localhost:3000/api/health](http://localhost:3000/api/health). Without a configured database it returns `{ "success": true, "data": { "status": "degraded" } }` and never includes secrets.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Database (needs Docker): see [supabase/README.md](supabase/README.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm run db:start
+   npm run db:reset
+   npm run db:types
+   ```
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Next.js development server |
+| `npm run build` | Production build |
+| `npm run start` | Run the production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Next.js typegen + TypeScript (`tsc --noEmit`) |
+| `npm test` | Vitest |
+| `npm run db:start` | Local Supabase (Docker) |
+| `npm run db:reset` | Reapply migrations |
+| `npm run db:types` | Generate `src/server/supabase/database.types.ts` |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Architecture notes
+
+- Next.js App Router + TypeScript, with application code in `src/`.
+- API flow: Route Handler → controller → service → repository → server-only Supabase.
+- Errors use `AppError` and one formatter. Logs are JSON (Pino) with redaction. Request IDs are on responses as `x-request-id`.
+- Auth rate limiting uses an in-memory limiter for local/single-process demos only. It is not shared across instances.
+- TanStack Query for remote/API state; Zustand for cart and other client-owned UI state (added in later phases).
+- Database schema and RLS live in `supabase/migrations/`. Types live in `src/server/supabase/database.types.ts`.
+- Supabase URL and anon key are `SUPABASE_URL` and `SUPABASE_ANON_KEY` (server-only, not `NEXT_PUBLIC_`).

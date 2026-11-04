@@ -1,0 +1,21 @@
+---
+description: Project scope and architectural map for the single-store shop
+alwaysApply: true
+---
+# Project overview
+
+This is a greenfield, single-business e-commerce app using Next.js App Router, TypeScript and Supabase.
+
+MVP:
+- Public product/category storefront and search
+- Customer auth, profile/address, cart, checkout and order history
+- Cash on delivery only
+- Admin product/category/order/store-settings management
+- Admins are provisioned manually
+
+Explicitly excluded: multi-store marketplace, drivers, GPS tracking, driver dashboards, online payments, microservices and unnecessary enterprise abstractions.
+
+Keep the code readable and easy to explain in a software engineering course. Prefer the simplest design that satisfies security and correctness. Do not add dependencies or abstractions without a concrete reason.
+
+Course mapping:
+Route Handler → Controller → Service → Repository → Supabase.

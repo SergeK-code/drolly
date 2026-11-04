@@ -1,0 +1,17 @@
+---
+description: Mandatory Supabase server-only boundary
+alwaysApply: true
+---
+# Supabase access boundary — mandatory
+
+- Supabase SDK imports, client creation, queries, auth administration and storage operations belong only in server-only modules under `src/server/**`.
+- Add `import 'server-only'` to modules that must never enter a client bundle.
+- The browser communicates only with this application's `/api/**` endpoints.
+- Never create a browser Supabase client.
+- Never import a server module from a Client Component, client hook, Zustand store or browser utility.
+- Never call Supabase from a component, hook or Zustand store.
+- Never expose the service-role key or any secret to client code or `NEXT_PUBLIC_*`.
+- Prefer a request-scoped authenticated Supabase client for normal operations so RLS applies.
+- A service-role client, if absolutely necessary, must be isolated and narrowly scoped. Never use it as a general RLS bypass.
+- Before completing a task, search for Supabase imports and verify they remain server-only.
+- If a requested implementation conflicts with this rule, stop and explain the conflict instead of weakening the boundary.

@@ -1,0 +1,3 @@
+-- Lookup roles, order statuses and the store settings row are inserted in
+-- supabase/migrations/20261104120000_init_schema.sql so every reset has them.
+-- Add optional demo catalog data here later if needed.

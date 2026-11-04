@@ -1,0 +1,34 @@
+Implement **Phase [X]: [PHASE NAME]** from `@docs/implementation/IMPLEMENTATION_ROADMAP.md`.
+
+Follow these architectural references:
+
+- `@docs/architecture/SYSTEM_ARCHITECTURE.md`
+- `@docs/architecture/DATABASE_SCHEMA.md`
+- `@docs/architecture/ORDER_AND_DELIVERY_WORKFLOWS.md`
+
+Follow the applicable Cursor skills and project rules.
+
+Implementation requirements:
+
+1. Implement only the scope of this phase.
+2. Respect the existing architecture and naming conventions.
+3. Keep business logic outside UI components.
+4. Enforce authorization on the server and through RLS where applicable.
+5. Validate untrusted input using Zod.
+6. Preserve tenant isolation.
+7. Use transactions and idempotency where required.
+8. Do not introduce unnecessary dependencies or duplicate existing functionality.
+9. Do not invent business rules when the documentation is unclear. Ask before making consequential assumptions.
+10. Update TypeScript database types and migrations where necessary.
+
+After implementation:
+
+- Run relevant tests.
+- Run TypeScript checks.
+- Run linting.
+- Run a production build where practical.
+- Report modified and created files.
+- Report database migrations and security changes.
+- Report verification results and any remaining issues.
+
+Do not mark the phase complete if its verification requirements have not passed.

@@ -1,0 +1,33 @@
+Perform an independent architectural and security review of the implementation for **Phase [X]: [PHASE NAME]**.
+
+Compare the implementation against:
+
+- `@docs/00_PROJECT_BRIEF.md`
+- `@docs/01_SYSTEM_ARCHITECTURE.md`
+- `@docs/02_DATABASE_DESIGN.md`
+- `@docs/05_CURSOR_PHAE_PROMPTS.md`
+- `@docs/06_BEGINNER_GUIDE.md`
+
+Review:
+
+1. Architectural consistency and separation of concerns.
+2. Database relationships, constraints and migrations.
+3. Authentication, authorization and RLS.
+4. Multi-tenant isolation and cross-store access.
+5. Business logic correctness.
+6. Transaction integrity and idempotency.
+7. Error handling and edge cases.
+8. Type safety and code quality.
+9. Performance and unnecessary queries.
+10. Test coverage and actual test results.
+
+Identify:
+- Critical issues.
+- Security vulnerabilities.
+- Architectural deviations.
+- Missing edge cases.
+- Improvements worth making.
+
+Do not modify files during the initial review.
+
+Provide a prioritized report. Wait for approval before fixing issues.

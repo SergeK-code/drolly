@@ -1,0 +1,14 @@
+---
+description: Simple consistent storefront and admin UI guidance
+alwaysApply: true
+---
+# UI conventions
+
+- Build a clean, responsive, accessible storefront and admin area.
+- Prioritize clear hierarchy, readable text, consistent spacing and predictable navigation.
+- Use a small shared set of buttons, inputs, cards, tables, dialogs and feedback components.
+- Forms show field-level validation errors and submission/loading state.
+- Destructive actions require confirmation.
+- Provide loading skeletons or clear loading indicators, empty states, retryable errors and success feedback.
+- Do not over-animate. Avoid decorative complexity that harms performance or course readability.
+- Do not invent extra product requirements or screens.

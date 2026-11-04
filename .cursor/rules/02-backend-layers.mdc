@@ -1,0 +1,15 @@
+---
+description: Backend route-controller-service-repository conventions
+alwaysApply: true
+---
+# Backend layering
+
+Use this flow for API operations:
+1. Route Handler: HTTP method, URL, cookies and response.
+2. Controller: parse/validate request and invoke a service.
+3. Service: business rules, identity/role checks and orchestration.
+4. Repository: database access through server-only Supabase.
+
+Keep each layer small. Do not put SQL/database calls or business rules in route handlers. Do not put HTTP response logic in services. Do not add a repository for a trivial operation if it makes the code harder to follow; preserve the conceptual boundary.
+
+All API handlers use the shared response/error helpers. Avoid duplicate error formatting.
