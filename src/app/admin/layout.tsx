@@ -1,25 +1,21 @@
-import { Suspense, type ReactNode } from "react";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/server/auth/current-user";
+import { type ReactNode } from "react";
+import { ProtectedPage } from "@/server/auth/protect";
+import { AdminShell } from "@/features/admin/admin-shell";
 
-async function AdminGate({ children }: { children: ReactNode }) {
-  const user = await getCurrentUser();
+export const instant = false;
 
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  if (user.role !== "admin") {
-    redirect("/account");
-  }
-
-  return children;
-}
-
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <Suspense fallback={<p className="px-6 py-16">Loading admin…</p>}>
-      <AdminGate>{children}</AdminGate>
-    </Suspense>
+    <ProtectedPage
+      returnTo="/admin"
+      requireAdmin
+      fallback={<p className="px-4 py-6 text-sm text-muted">Checking session…</p>}
+    >
+      <AdminShell>{children}</AdminShell>
+    </ProtectedPage>
   );
 }

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 import { getEnv, resetEnvCache } from "@/lib/env";
 
 const ORIGINAL_URL = process.env.SUPABASE_URL;

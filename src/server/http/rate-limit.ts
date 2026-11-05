@@ -1,4 +1,4 @@
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 
 /**
  * In-memory rate limiter for local development and a single Node process.

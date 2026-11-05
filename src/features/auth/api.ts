@@ -1,16 +1,4 @@
-type ApiError = {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    details?: { fieldErrors?: Record<string, string[]> };
-  };
-};
-
-type ApiSuccess<T> = {
-  success: true;
-  data: T;
-};
+import { parseApiResponse } from "@/lib/api";
 
 export type PublicUser = {
   id: string;
@@ -18,27 +6,6 @@ export type PublicUser = {
   fullName: string;
   role: "customer" | "admin";
 };
-
-async function parseResponse<T>(response: Response): Promise<T> {
-  const payload = (await response.json()) as ApiSuccess<T> | ApiError;
-
-  if (!("success" in payload) || payload.success !== true) {
-    const error = new Error(
-      payload && "error" in payload
-        ? payload.error.message
-        : "The request failed.",
-    );
-    Object.assign(error, {
-      fieldErrors:
-        payload && "error" in payload
-          ? payload.error.details?.fieldErrors
-          : undefined,
-    });
-    throw error;
-  }
-
-  return payload.data;
-}
 
 export async function registerAccount(input: {
   fullName: string;
@@ -52,7 +19,7 @@ export async function registerAccount(input: {
     body: JSON.stringify(input),
   });
 
-  return parseResponse<{
+  return parseApiResponse<{
     user: PublicUser | null;
     confirmationRequired: boolean;
   }>(response);
@@ -66,7 +33,17 @@ export async function signInAccount(input: { email: string; password: string }) 
     body: JSON.stringify(input),
   });
 
-  return parseResponse<{ user: PublicUser | null }>(response);
+  return parseApiResponse<{ user: PublicUser | null }>(response);
+}
+
+export const sessionQueryKey = ["auth", "session"] as const;
+
+export async function fetchSession(): Promise<{ user: PublicUser | null }> {
+  const response = await fetch("/api/auth/session", {
+    credentials: "include",
+  });
+
+  return parseApiResponse(response);
 }
 
 export async function signOutAccount() {
@@ -77,5 +54,5 @@ export async function signOutAccount() {
     body: "{}",
   });
 
-  return parseResponse<{ signedOut: boolean }>(response);
+  return parseApiResponse<{ signedOut: boolean }>(response);
 }

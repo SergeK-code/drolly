@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 import { resetEnvCache } from "@/lib/env";
 import { assertSameOrigin } from "@/server/http/assert-same-origin";
 

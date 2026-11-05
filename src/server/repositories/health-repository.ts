@@ -1,6 +1,6 @@
 import "server-only";
 
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 import { createSupabaseServerClient } from "@/server/supabase/server-client";
 
 export async function assertStoreSettingsReadable(): Promise<void> {

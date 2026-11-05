@@ -15,7 +15,7 @@ import {
 } from "@/server/auth/schemas";
 import { assertSameOrigin } from "@/server/http/assert-same-origin";
 import { getClientIp } from "@/server/http/client-ip";
-import { jsonSuccess } from "@/server/http/json";
+import { jsonSuccess } from "@/server/http/api";
 import { parseJsonBody } from "@/server/http/parse-request";
 import { assertWithinRateLimit } from "@/server/http/rate-limit";
 

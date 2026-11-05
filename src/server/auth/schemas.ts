@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 
 const emailSchema = z
   .string()

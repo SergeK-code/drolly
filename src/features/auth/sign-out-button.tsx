@@ -2,23 +2,35 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { signOutAccount } from "@/features/auth/api";
+import { withNotice } from "@/lib/return-to";
+import { Button } from "@/ui/button";
+import { ConfirmModal } from "@/ui/confirm-modal";
+import { useToast } from "@/ui/toast";
 
-export function SignOutButton() {
+export function SignOutButton({
+  variant = "button",
+}: {
+  variant?: "button" | "nav";
+}) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+  const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  async function onClick() {
+  async function onConfirm() {
     setPending(true);
-    setError(null);
 
     try {
       await signOutAccount();
-      router.push("/sign-in");
+      queryClient.clear();
+      router.push(withNotice("/sign-in", "signed-out"));
       router.refresh();
     } catch (signOutError) {
-      setError(
+      showToast(
+        "error",
         signOutError instanceof Error
           ? signOutError.message
           : "Could not sign out.",
@@ -28,20 +40,26 @@ export function SignOutButton() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <button
+    <>
+      <Button
         type="button"
-        onClick={onClick}
+        onClick={() => setOpen(true)}
         disabled={pending}
-        className="w-fit rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium focus:outline focus:outline-2 focus:outline-offset-2 focus:outline-zinc-900 disabled:opacity-60 dark:border-zinc-700 dark:focus:outline-zinc-100"
+        variant={variant === "nav" ? "ghost" : "secondary"}
+        size={variant === "nav" ? "sm" : "md"}
+        className={variant === "nav" ? "px-2" : "w-fit"}
       >
-        {pending ? "Signing out…" : "Sign out"}
-      </button>
-      {error ? (
-        <p role="alert" className="text-sm text-red-700 dark:text-red-400">
-          {error}
-        </p>
-      ) : null}
-    </div>
+        Sign out
+      </Button>
+      <ConfirmModal
+        open={open}
+        title="Sign out"
+        message="Sign out of this account?"
+        confirmLabel="Sign out"
+        pending={pending}
+        onClose={() => setOpen(false)}
+        onConfirm={() => void onConfirm()}
+      />
+    </>
   );
 }

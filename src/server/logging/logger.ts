@@ -49,12 +49,19 @@ export const logger = createLogger();
 
 export function safeErrorContext(error: unknown): {
   name: string;
+  message?: string;
   code?: string;
   status?: number;
 } {
   if (error instanceof Error) {
-    const context: { name: string; code?: string; status?: number } = {
+    const context: {
+      name: string;
+      message?: string;
+      code?: string;
+      status?: number;
+    } = {
       name: error.name,
+      message: error.message,
     };
 
     if ("code" in error && typeof error.code === "string") {

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 
 vi.mock("@/server/repositories/health-repository", () => ({
   assertStoreSettingsReadable: vi.fn(),

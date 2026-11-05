@@ -1,22 +1,37 @@
-import Link from "next/link";
+import { Suspense } from "react";
+import { CatalogBrowser } from "@/features/catalog/catalog-browser";
+import { PageShell } from "@/ui/page-shell";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-4 px-6 py-16">
-      <h1 className="text-3xl font-semibold tracking-tight">Drolly</h1>
-      <p className="max-w-prose text-base leading-7 text-zinc-600 dark:text-zinc-400">
-        Catalog, cart, checkout and admin tools will be added in later phases.
-        The browser talks only to this app&apos;s API routes; Supabase stays on
-        the server.
-      </p>
-      <nav className="flex flex-wrap gap-4 text-sm font-medium">
-        <Link className="underline underline-offset-2" href="/sign-in">
-          Sign in
-        </Link>
-        <Link className="underline underline-offset-2" href="/sign-up">
-          Create account
-        </Link>
-      </nav>
-    </main>
+    <PageShell>
+      <header className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Drolly
+          </h1>
+          <p className="max-w-prose text-sm leading-6 text-muted sm:text-base sm:leading-7">
+            Browse active products. Cash on delivery checkout comes in a later
+            phase.
+          </p>
+        </div>
+      </header>
+      <Suspense fallback={<CatalogFallback />}>
+        <CatalogBrowser />
+      </Suspense>
+    </PageShell>
+  );
+}
+
+function CatalogFallback() {
+  return (
+    <div className="flex flex-col gap-5" aria-busy="true">
+      <div className="h-11 max-w-md rounded-md bg-border/70" />
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <li className="h-64 rounded-lg bg-border/70" />
+        <li className="h-64 rounded-lg bg-border/70" />
+        <li className="hidden h-64 rounded-lg bg-border/70 lg:block" />
+      </ul>
+    </div>
   );
 }

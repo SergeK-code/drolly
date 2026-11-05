@@ -1,6 +1,6 @@
 import "server-only";
 
-import { jsonSuccess } from "@/server/http/json";
+import { jsonSuccess } from "@/server/http/api";
 import { getHealth } from "@/server/services/health-service";
 
 export async function getHealthResponse(requestId: string) {

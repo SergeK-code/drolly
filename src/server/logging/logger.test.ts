@@ -1,6 +1,7 @@
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
-import { createLogger } from "@/server/logging/logger";
+import { AppError } from "@/server/http/api";
+import { createLogger, safeErrorContext } from "@/server/logging/logger";
 
 describe("logger redaction", () => {
   it("redacts secrets and does not keep raw password values", async () => {
@@ -31,5 +32,22 @@ describe("logger redaction", () => {
     expect(output).not.toContain("header.payload.sig");
     expect(output).not.toContain("service-role-value");
     expect(output).not.toContain("sb-access-token=abc");
+  });
+});
+
+describe("safeErrorContext", () => {
+  it("keeps the error message so logs show what happened", () => {
+    const error = new AppError(
+      "CONFLICT",
+      409,
+      "duplicate key value violates unique constraint",
+    );
+
+    expect(safeErrorContext(error)).toEqual({
+      name: "AppError",
+      message: "duplicate key value violates unique constraint",
+      code: "CONFLICT",
+      status: 409,
+    });
   });
 });

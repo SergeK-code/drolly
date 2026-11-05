@@ -1,17 +1,14 @@
 import "server-only";
 
-import {
-  invalidCredentialsError,
-  registrationFailedError,
-} from "@/server/auth/auth-errors";
 import { toPublicUser, type PublicUser } from "@/server/auth/public-user";
-import type { RegisterInput, SignInInput } from "@/server/auth/schemas";
-import { logger } from "@/server/logging/logger";
-import { ensureCustomerProfile } from "@/server/repositories/profile-repository";
 import {
   getCurrentUser,
   requireAdminFromSession,
-} from "@/server/auth/current-user";
+} from "@/server/auth/protect";
+import type { RegisterInput, SignInInput } from "@/server/auth/schemas";
+import { AppError } from "@/server/http/api";
+import { logger } from "@/server/logging/logger";
+import { ensureCustomerProfile } from "@/server/repositories/profile-repository";
 import { createSupabaseServerClient } from "@/server/supabase/server-client";
 
 export type AuthResult = {
@@ -31,7 +28,7 @@ export async function registerUser(input: RegisterInput): Promise<AuthResult> {
 
   if (error || !data.user) {
     logger.warn({ code: error?.code }, "Registration failed");
-    throw registrationFailedError();
+    throw new AppError("VALIDATION_ERROR", 400, "Could not create the account.");
   }
 
   const profile = await ensureCustomerProfile(data.user.id, input.fullName);
@@ -59,7 +56,7 @@ export async function signInUser(input: SignInInput): Promise<AuthResult> {
   });
 
   if (error || !data.user || !data.session) {
-    throw invalidCredentialsError();
+    throw new AppError("UNAUTHENTICATED", 401, "Invalid email or password.");
   }
 
   const profile = await ensureCustomerProfile(data.user.id, "");

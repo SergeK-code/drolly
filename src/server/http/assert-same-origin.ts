@@ -1,5 +1,5 @@
 import { getEnv } from "@/lib/env";
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 
 export function assertSameOrigin(request: Request): void {
   const allowedOrigin = new URL(getEnv().NEXT_PUBLIC_APP_URL).origin;

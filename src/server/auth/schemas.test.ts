@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 import {
   registerSchema,
   rejectClientRoleFields,

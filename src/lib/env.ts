@@ -1,7 +1,7 @@
 import "server-only";
 
 import { z } from "zod";
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 import { logger } from "@/server/logging/logger";
 
 const envSchema = z.object({

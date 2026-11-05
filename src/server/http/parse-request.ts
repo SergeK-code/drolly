@@ -1,4 +1,4 @@
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 
 export async function parseJsonBody(request: Request): Promise<unknown> {
   const contentType = request.headers.get("content-type") ?? "";

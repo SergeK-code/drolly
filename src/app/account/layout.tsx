@@ -1,16 +1,8 @@
-import { Suspense, type ReactNode } from "react";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/server/auth/current-user";
+import { type ReactNode } from "react";
+import { ProtectedPage } from "@/server/auth/protect";
+import { PageShell } from "@/ui/page-shell";
 
-async function AccountGate({ children }: { children: ReactNode }) {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  return children;
-}
+export const instant = false;
 
 export default function AccountLayout({
   children,
@@ -18,8 +10,9 @@ export default function AccountLayout({
   children: ReactNode;
 }) {
   return (
-    <Suspense fallback={<p className="px-6 py-16">Loading account…</p>}>
-      <AccountGate>{children}</AccountGate>
-    </Suspense>
+    <PageShell>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Your account</h1>
+      <ProtectedPage returnTo="/account">{children}</ProtectedPage>
+    </PageShell>
   );
 }

@@ -1,0 +1,19 @@
+---
+description: Keep the app small, course-friendly, and easy to maintain
+alwaysApply: true
+---
+
+# Keep it simple
+
+This is a lightweight university-course shop. When implementing anything, choose the smallest change that works.
+
+- Only CRUD, caching, session, and validation. No extra layers, stores, helpers, or files unless they remove duplication that already hurts.
+- Prefer editing an existing file over adding a new one. Do not grow a deep file tree.
+- Route Handler → Controller → Service → Repository is enough. Skip a layer if the operation is trivial.
+- Supabase stays in `src/server/**` with `import 'server-only'`. The browser talks only to `/api/**`.
+- One error path: `AppError` + shared API handler. Do not invent new error types or formatters.
+- TanStack Query owns server/session data. Invalidate the shared query-key prefix after a mutation. `queryClient.clear()` on sign-out. Do not add extra cache libraries or sync engines.
+- Zustand only for cart (and tiny UI state). Never copy API data into Zustand.
+- No live subscriptions, websockets, or realtime unless a later phase explicitly requires them. Refetch/invalidate is enough.
+- Do not add dependencies, abstractions, or “enterprise” patterns to look complete.
+- Delete unused code when a simpler path replaces it.

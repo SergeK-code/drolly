@@ -1,4 +1,4 @@
-import { AppError } from "@/server/errors/app-error";
+import { AppError } from "@/server/http/api";
 import { logger, safeErrorContext } from "@/server/logging/logger";
 import { assertStoreSettingsReadable } from "@/server/repositories/health-repository";
 
