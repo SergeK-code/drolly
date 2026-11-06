@@ -62,7 +62,7 @@ function HeaderBar({ children }: { children: ReactNode }) {
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link
           href="/"
-          className="text-sm font-semibold tracking-tight text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="text-sm font-semibold tracking-tight text-accent focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           Drolly
         </Link>

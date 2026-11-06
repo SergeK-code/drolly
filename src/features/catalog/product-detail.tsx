@@ -46,7 +46,7 @@ function ProductDetailBody({ product }: { product: PublicProduct }) {
       <MediaImage
         src={catalogImageUrl(product.slug, product.imagePath)}
         alt={product.name}
-        className="aspect-[16/9] w-full"
+        className="aspect-video w-full"
       />
       <div className="flex flex-col gap-3 p-5 sm:p-6">
         <p className="text-sm text-muted">{product.categoryName}</p>

@@ -93,13 +93,15 @@ export function CategoryTable() {
 
           {query.data && query.data.items.length > 0 ? (
             <AdminTableCard>
-              <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+              <table className="w-full min-w-xl border-collapse text-left text-sm">
                 <thead className="sticky top-0 z-10 bg-background">
                   <tr className="border-b border-border">
                     <th className="px-4 py-3 font-medium">Category</th>
                     <th className="px-4 py-3 font-medium">Slug</th>
                     <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 text-right font-medium">Actions</th>
+                    <th className="px-4 py-3 text-right font-medium">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -186,8 +188,8 @@ export function CategoryTable() {
         onClose={() => setInUse(null)}
       >
         <p className="mb-5 text-sm leading-6 text-muted">
-          “{inUse?.name ?? ""}” cannot be deleted because it is used by products.
-          Deactivate it to hide it from the public catalog.
+          “{inUse?.name ?? ""}” cannot be deleted because it is used by
+          products. Deactivate it to hide it from the public catalog.
         </p>
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="secondary" onClick={() => setInUse(null)}>

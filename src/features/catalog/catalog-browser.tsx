@@ -215,7 +215,7 @@ function CategoryChip({
       aria-current={selected ? "page" : undefined}
       className={cx(
         "inline-flex min-h-9 items-center rounded-full px-3 text-xs font-medium",
-        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        "focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent",
         selected
           ? "bg-accent text-accent-foreground shadow-sm"
           : "bg-surface text-foreground shadow-sm ring-1 ring-border hover:bg-background",
@@ -238,12 +238,12 @@ function ProductCard({
       <article className="flex h-full flex-col">
         <Link
           href={`/products/${product.slug}`}
-          className="flex flex-1 flex-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="flex flex-1 flex-col focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <MediaImage
             src={catalogImageUrl(product.slug, product.imagePath)}
             alt=""
-            className="aspect-[4/3] w-full"
+            className="aspect-4/3 w-full"
           />
           <div className="flex flex-1 flex-col gap-1 p-4">
             <h2 className="text-base font-semibold leading-snug">

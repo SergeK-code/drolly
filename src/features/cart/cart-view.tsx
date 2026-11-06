@@ -98,7 +98,7 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
                 <Link
                   href={`/products/${live?.slug ?? item.snapshot.slug}`}
                   onClick={onContinue}
-                  className="font-medium leading-snug focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                  className="font-medium leading-snug focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent"
                 >
                   {live?.name ?? item.snapshot.name}
                 </Link>
@@ -116,7 +116,8 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
                 </p>
               ) : null}
               <div className="flex flex-wrap items-center gap-2">
-                {status === "unavailable" || status === "out_of_stock" ? null : (
+                {status === "unavailable" ||
+                status === "out_of_stock" ? null : (
                   <QuantityControls
                     quantity={item.quantity}
                     max={live?.stockQuantity}
@@ -165,7 +166,9 @@ function LineStatus({
 }) {
   if (status === "unavailable") {
     return (
-      <p className="text-xs text-danger">This product is no longer available.</p>
+      <p className="text-xs text-danger">
+        This product is no longer available.
+      </p>
     );
   }
 
