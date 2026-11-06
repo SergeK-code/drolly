@@ -22,7 +22,7 @@ import { Input } from "@/ui/input";
 import { Field } from "@/ui/field";
 import { MediaImage } from "@/ui/media-image";
 import { cx } from "@/ui/cx";
-import type { ProductSort } from "@/server/catalog/schemas";
+import type { ProductSort } from "@/lib/catalog-filters";
 
 function useDebouncedValue(value: string, delayMs: number): string {
   const [debounced, setDebounced] = useState(value);

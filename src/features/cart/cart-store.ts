@@ -5,6 +5,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import {
   addCartItem,
   CART_STORAGE_KEY,
+  parsePersistedCartItems,
   removeCartItem,
   setCartItemQuantity,
   type CartItem,
@@ -23,6 +24,7 @@ type CartStore = {
   setQuantity: (productId: string, quantity: number, maxQuantity?: number) => void;
   remove: (productId: string) => void;
   clear: () => void;
+  replaceItems: (items: CartItem[]) => void;
   openDrawer: () => void;
   closeDrawer: () => void;
 };
@@ -69,6 +71,7 @@ export const useCart = create<CartStore>()(
       remove: (productId) =>
         set({ items: removeCartItem(get().items, productId) }),
       clear: () => set({ items: [] }),
+      replaceItems: (items) => set({ items }),
       openDrawer: () => set({ drawerOpen: true }),
       closeDrawer: () => set({ drawerOpen: false }),
     }),
@@ -78,6 +81,16 @@ export const useCart = create<CartStore>()(
         typeof window === "undefined" ? memoryStorage() : localStorage,
       ),
       partialize: (state) => ({ items: state.items }),
+      merge: (persisted, current) => ({
+        ...current,
+        items: parsePersistedCartItems(
+          persisted &&
+            typeof persisted === "object" &&
+            "items" in persisted
+            ? persisted.items
+            : undefined,
+        ),
+      }),
     },
   ),
 );

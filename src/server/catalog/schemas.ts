@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+  categorySlugSchema,
+  productSortSchema,
+} from "@/lib/catalog-filters";
+
+export { categorySlugSchema, productSortSchema };
+export type { ProductSort } from "@/lib/catalog-filters";
 
 export const DEFAULT_CATALOG_LIMIT = 12;
 export const MAX_CATALOG_LIMIT = 24;
@@ -12,13 +19,6 @@ const emptyToUndefined = (value: unknown) => {
   return trimmed.length === 0 ? undefined : trimmed;
 };
 
-export const categorySlugSchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(80)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Enter a valid slug.");
-
 export function slugFromName(name: string): string {
   const slug = name
     .trim()
@@ -29,14 +29,6 @@ export function slugFromName(name: string): string {
 
   return slug.length > 0 ? slug : "item";
 }
-
-export const productSortSchema = z.enum([
-  "newest",
-  "price-asc",
-  "price-desc",
-  "name-asc",
-  "name-desc",
-]);
 
 export const productListQuerySchema = z
   .object({
@@ -96,5 +88,4 @@ export const productIdOrSlugSchema = z
   .max(80);
 
 export type ProductListQuery = z.infer<typeof productListQuerySchema>;
-export type ProductSort = z.infer<typeof productSortSchema>;
 export type CategoryListQuery = z.infer<typeof categoryListQuerySchema>;

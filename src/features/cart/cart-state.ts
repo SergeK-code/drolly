@@ -1,5 +1,9 @@
 export const CART_STORAGE_KEY = "drolly-cart";
 export const MAX_CART_QUANTITY = 99;
+export const MAX_CART_LINES = 50;
+
+const PRODUCT_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export type CartSnapshot = {
   name: string;
@@ -16,10 +20,14 @@ export type CartItem = {
 };
 
 export type CartLineStatus =
+  | "pending"
   | "available"
   | "limited"
   | "out_of_stock"
-  | "unavailable";
+  | "unavailable"
+  | "unknown";
+
+export type CartRefreshState = "pending" | "live" | "not_found" | "error";
 
 export function clampCartQuantity(
   quantity: number,
@@ -43,6 +51,10 @@ export function addCartItem(
   const existing = items.find((item) => item.productId === input.productId);
 
   if (!existing) {
+    if (items.length >= MAX_CART_LINES) {
+      return items;
+    }
+
     return [
       ...items,
       {
@@ -91,15 +103,19 @@ export function cartItemCount(items: CartItem[]): number {
 
 export function cartLineStatus(
   live: { stockQuantity: number } | null | undefined,
-  unavailable: boolean,
+  refresh: CartRefreshState,
   quantity: number,
 ): CartLineStatus {
-  if (unavailable) {
+  if (refresh === "not_found") {
     return "unavailable";
   }
 
-  if (!live) {
-    return "available";
+  if (refresh === "error") {
+    return "unknown";
+  }
+
+  if (refresh === "pending" || !live) {
+    return "pending";
   }
 
   if (live.stockQuantity <= 0) {
@@ -118,9 +134,117 @@ export function displayLineTotalMinor(
   priceMinor: number,
   status: CartLineStatus,
 ): number {
-  if (status === "unavailable" || status === "out_of_stock") {
+  if (
+    status === "unavailable" ||
+    status === "out_of_stock" ||
+    status === "unknown" ||
+    status === "pending"
+  ) {
     return 0;
   }
 
   return quantity * priceMinor;
+}
+
+export function alignCartQuantities(
+  items: CartItem[],
+  liveStockById: ReadonlyMap<string, number>,
+): CartItem[] {
+  return items.map((item) => {
+    const stock = liveStockById.get(item.productId);
+    if (stock === undefined || stock <= 0 || item.quantity <= stock) {
+      return item;
+    }
+
+    return {
+      ...item,
+      quantity: clampCartQuantity(item.quantity, stock),
+    };
+  });
+}
+
+export function parsePersistedCartItems(value: unknown): CartItem[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  const items: CartItem[] = [];
+  const seen = new Set<string>();
+
+  for (const entry of value) {
+    if (items.length >= MAX_CART_LINES) {
+      break;
+    }
+
+    const item = parseCartItem(entry);
+    if (!item || seen.has(item.productId)) {
+      continue;
+    }
+
+    seen.add(item.productId);
+    items.push(item);
+  }
+
+  return items;
+}
+
+function parseCartItem(value: unknown): CartItem | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  if (typeof record.productId !== "string" || !PRODUCT_ID_PATTERN.test(record.productId)) {
+    return null;
+  }
+
+  if (typeof record.quantity !== "number" || !Number.isFinite(record.quantity)) {
+    return null;
+  }
+
+  const snapshot = parseSnapshot(record.snapshot);
+  if (!snapshot) {
+    return null;
+  }
+
+  return {
+    productId: record.productId,
+    quantity: clampCartQuantity(record.quantity),
+    snapshot,
+  };
+}
+
+function parseSnapshot(value: unknown): CartSnapshot | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  if (typeof record.name !== "string" || record.name.trim().length === 0) {
+    return null;
+  }
+
+  if (typeof record.slug !== "string" || record.slug.trim().length === 0) {
+    return null;
+  }
+
+  if (typeof record.priceMinor !== "number" || !Number.isFinite(record.priceMinor) || record.priceMinor < 0) {
+    return null;
+  }
+
+  if (typeof record.currency !== "string" || !/^[A-Z]{3}$/.test(record.currency)) {
+    return null;
+  }
+
+  if (record.imagePath !== null && typeof record.imagePath !== "string") {
+    return null;
+  }
+
+  return {
+    name: record.name.trim().slice(0, 120),
+    slug: record.slug.trim().slice(0, 80),
+    priceMinor: Math.trunc(record.priceMinor),
+    currency: record.currency,
+    imagePath: record.imagePath,
+  };
 }

@@ -2,7 +2,9 @@ import {
   categorySlugSchema,
   productSortSchema,
   type ProductSort,
-} from "@/server/catalog/schemas";
+} from "@/lib/catalog-filters";
+
+export type { ProductSort };
 
 export type CatalogFilters = {
   q: string;
