@@ -1,6 +1,6 @@
 /**
  * Database types for server-only Supabase access.
- * Hand-written to match supabase/migrations/20261104120000_init_schema.sql.
+ * Hand-written to match supabase/migrations.
  * When Docker/local Supabase is available, replace with:
  * `npm run db:types`
  * Do not import this module from Client Components.
@@ -70,6 +70,42 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      checkout_attempts: {
+        Row: {
+          user_id: string;
+          idempotency_key: string;
+          order_id: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          idempotency_key: string;
+          order_id: string;
+          created_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          idempotency_key?: string;
+          order_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "checkout_attempts_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "checkout_attempts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       customer_addresses: {
         Row: {
@@ -391,6 +427,24 @@ export type Database = {
       is_admin: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      place_cod_order: {
+        Args: {
+          p_idempotency_key: string;
+          p_items: {
+            product_id: string;
+            quantity: number;
+          }[];
+          p_address_id?: string | null;
+          p_address?: {
+            recipient_name: string;
+            phone: string;
+            address_line: string;
+            area: string;
+            notes?: string | null;
+          } | null;
+        };
+        Returns: string;
       };
     };
     Enums: {

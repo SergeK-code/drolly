@@ -11,7 +11,7 @@ describe("formatApiError", () => {
     [403, "FORBIDDEN", "You do not have permission to do this."],
     [404, "NOT_FOUND", "The requested resource was not found."],
     [409, "CONFLICT", "This value is already used."],
-    [422, "VALIDATION_ERROR", "Validation failed"],
+    [422, "VALIDATION_ERROR", "Check the highlighted fields and try again."],
     [429, "RATE_LIMITED", "Too many requests. Try again later."],
     [500, "DATABASE_ERROR", "An unexpected error occurred."],
   ] as const)(
@@ -41,7 +41,7 @@ describe("formatApiError", () => {
     const body = await formatApiError(error, REQUEST_ID).json();
 
     expect(body.error.fieldErrors).toEqual({ email: ["Required"] });
-    expect(body.error.message).toBe("Validation failed");
+    expect(body.error.message).toBe("Required");
   });
 
   it("maps Zod errors to a validation envelope", async () => {
@@ -56,7 +56,8 @@ describe("formatApiError", () => {
 
     expect(response.status).toBe(422);
     expect(body.error.code).toBe("VALIDATION_ERROR");
-    expect(body.error.message).toBe("Validation failed");
+    expect(body.error.message).toBe(body.error.fieldErrors.name[0]);
+    expect(body.error.message).not.toBe("Validation failed");
     expect(body.error.requestId).toBe(REQUEST_ID);
     expect(body.error.fieldErrors).toMatchObject({
       name: expect.any(Array),

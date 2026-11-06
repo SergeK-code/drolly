@@ -9,16 +9,20 @@ import {
   signInAccount,
   type PublicUser,
 } from "@/features/auth/api";
-import { ApiError } from "@/lib/api";
+import { explainApiError } from "@/lib/api";
+import { registerSchema, signInSchema } from "@/lib/auth-schemas";
 import { resolvePostAuthPath } from "@/lib/return-to";
+import {
+  firstFieldError,
+  validateForm,
+  type FieldErrors,
+} from "@/lib/zod-fields";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { Input } from "@/ui/input";
 import { useToast } from "@/ui/toast";
 
 type Mode = "sign-in" | "sign-up";
-
-type FieldErrors = Record<string, string[] | undefined>;
 
 export function AuthForm({
   mode,
@@ -52,8 +56,17 @@ export function AuthForm({
       let user: PublicUser | null = null;
 
       if (mode === "sign-up") {
-        const fullName = String(data.get("fullName") ?? "");
-        const result = await registerAccount({ fullName, email, password });
+        const parsed = validateForm(registerSchema, {
+          fullName: String(data.get("fullName") ?? ""),
+          email,
+          password,
+        });
+        if (!parsed.success) {
+          setFieldErrors(parsed.fieldErrors);
+          return;
+        }
+
+        const result = await registerAccount(parsed.data);
 
         if (result.confirmationRequired) {
           form.reset();
@@ -61,20 +74,27 @@ export function AuthForm({
             "success",
             "Check your email to confirm the account, then sign in.",
           );
-          setPending(false);
           return;
         }
 
         user = result.user;
       } else {
-        const result = await signInAccount({ email, password });
+        const parsed = validateForm(signInSchema, { email, password });
+        if (!parsed.success) {
+          setFieldErrors(parsed.fieldErrors);
+          return;
+        }
+
+        const result = await signInAccount(parsed.data);
         user = result.user;
       }
 
       form.reset();
 
       if (!user) {
-        showToast("error", "Sign in to continue.");
+        setFieldErrors({
+          password: ["Invalid email or password."],
+        });
         return;
       }
 
@@ -86,13 +106,10 @@ export function AuthForm({
       router.push(resolvePostAuthPath(returnTo, user.role));
       router.refresh();
     } catch (submitError) {
-      const message =
-        submitError instanceof Error
-          ? submitError.message
-          : "The request failed.";
-      showToast("error", message);
-      if (submitError instanceof ApiError && submitError.fieldErrors) {
-        setFieldErrors(submitError.fieldErrors);
+      const explained = explainApiError(submitError);
+      setFieldErrors(explained.fieldErrors);
+      if (Object.keys(explained.fieldErrors).length === 0) {
+        showToast("error", explained.message);
       }
     } finally {
       setPending(false);
@@ -111,43 +128,51 @@ export function AuthForm({
         <Field
           id="fullName"
           label="Full name"
-          error={fieldErrors.fullName?.[0]}
+          error={firstFieldError(fieldErrors, "fullName")}
         >
           <Input
             id="fullName"
             name="fullName"
             autoComplete="off"
-            required
             disabled={pending}
           />
         </Field>
       ) : null}
 
-      <Field id="email" label="Email" error={fieldErrors.email?.[0]}>
+      <Field
+        id="email"
+        label="Email"
+        error={firstFieldError(fieldErrors, "email")}
+      >
         <Input
           id="email"
           name="email"
           type="email"
           autoComplete="off"
-          required
           disabled={pending}
         />
       </Field>
 
-      <Field id="password" label="Password" error={fieldErrors.password?.[0]}>
+      <Field
+        id="password"
+        label="Password"
+        error={firstFieldError(fieldErrors, "password")}
+      >
         <Input
           id="password"
           name="password"
           type="password"
           autoComplete="off"
-          required
-          minLength={mode === "sign-up" ? 8 : undefined}
           disabled={pending}
         />
       </Field>
 
       <Button type="submit" disabled={pending}>
-        {pending ? "Please wait…" : mode === "sign-up" ? "Create account" : "Sign in"}
+        {pending
+          ? "Please wait…"
+          : mode === "sign-up"
+            ? "Create account"
+            : "Sign in"}
       </Button>
     </form>
   );

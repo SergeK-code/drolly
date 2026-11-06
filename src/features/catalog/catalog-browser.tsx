@@ -22,7 +22,10 @@ import { Input } from "@/ui/input";
 import { Field } from "@/ui/field";
 import { MediaImage } from "@/ui/media-image";
 import { cx } from "@/ui/cx";
-import type { ProductSort } from "@/lib/catalog-filters";
+import {
+  catalogSearchQuerySchema,
+  type ProductSort,
+} from "@/lib/catalog-filters";
 
 function useDebouncedValue(value: string, delayMs: number): string {
   const [debounced, setDebounced] = useState(value);
@@ -63,14 +66,20 @@ export function CatalogBrowser() {
     setSearchInput(filters.q);
   }
 
+  const searchResult = catalogSearchQuerySchema.safeParse(searchInput);
+  const searchError = searchResult.success
+    ? undefined
+    : searchResult.error.issues[0]?.message;
+
   useEffect(() => {
-    if (debouncedSearch === filters.q) {
+    const parsed = catalogSearchQuerySchema.safeParse(debouncedSearch);
+    if (!parsed.success || parsed.data === filters.q) {
       return;
     }
 
     router.replace(
       catalogHref({
-        q: debouncedSearch,
+        q: parsed.data,
         category: filters.category,
         sort: filters.sort,
       }),
@@ -98,7 +107,7 @@ export function CatalogBrowser() {
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <Field id="catalog-search" label="Search products">
+        <Field id="catalog-search" label="Search products" error={searchError}>
           <Input
             id="catalog-search"
             type="search"

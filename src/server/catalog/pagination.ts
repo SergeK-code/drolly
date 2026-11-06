@@ -16,6 +16,7 @@ const categoryCursorSchema = z
   .strict();
 
 export type ProductCursor = z.infer<typeof productCursorSchema>;
+export type OrderCursor = ProductCursor;
 export type CategoryCursor = z.infer<typeof categoryCursorSchema>;
 
 export type PaginatedResult<T> = {
@@ -44,6 +45,10 @@ export function decodeProductCursor(value: string): ProductCursor {
   }
 
   return parsed.data;
+}
+
+export function decodeOrderCursor(value: string): OrderCursor {
+  return decodeProductCursor(value);
 }
 
 export function decodeCategoryCursor(value: string): CategoryCursor {

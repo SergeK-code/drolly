@@ -2,12 +2,17 @@
 
 import { useState, type FormEvent } from "react";
 import type { AdminCategory } from "@/features/admin-catalog/api";
-import { AdminApiError } from "@/features/admin-catalog/api";
-import { fieldError } from "@/features/admin-catalog/field-error";
 import {
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
 } from "@/features/admin-catalog/hooks";
+import { explainApiError } from "@/lib/api";
+import { adminCategoryWriteSchema } from "@/lib/admin-catalog-schemas";
+import {
+  firstFieldError,
+  validateForm,
+  type FieldErrors,
+} from "@/lib/zod-fields";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { Input, Textarea } from "@/ui/input";
@@ -24,59 +29,58 @@ export function CategoryForm({
   const createMutation = useCreateCategoryMutation();
   const updateMutation = useUpdateCategoryMutation(category?.id ?? "");
   const pending = createMutation.isPending || updateMutation.isPending;
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFieldErrors({});
 
     const form = new FormData(event.currentTarget);
-    const input = {
+    const parsed = validateForm(adminCategoryWriteSchema, {
       name: String(form.get("name") ?? ""),
       description: String(form.get("description") ?? "").trim() || null,
-      sortOrder: Number(form.get("sortOrder") ?? 0),
-    };
+      sortOrder: form.get("sortOrder"),
+    });
+    if (!parsed.success) {
+      setFieldErrors(parsed.fieldErrors);
+      return;
+    }
 
     try {
       if (category) {
-        await updateMutation.mutateAsync(input);
+        await updateMutation.mutateAsync(parsed.data);
         showToast("success", "Category saved.");
       } else {
-        await createMutation.mutateAsync(input);
+        await createMutation.mutateAsync(parsed.data);
         showToast("success", "Category created.");
       }
       onSaved?.();
     } catch (submitError) {
-      showToast(
-        "error",
-        submitError instanceof Error
-          ? submitError.message
-          : "The request failed.",
-      );
-      if (submitError instanceof AdminApiError && submitError.fieldErrors) {
-        setFieldErrors(submitError.fieldErrors);
+      const explained = explainApiError(submitError);
+      setFieldErrors(explained.fieldErrors);
+      if (Object.keys(explained.fieldErrors).length === 0) {
+        showToast("error", explained.message);
       }
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full flex-col gap-4">
+    <form onSubmit={onSubmit} className="flex w-full flex-col gap-4" noValidate>
       <Field
         id="category-name"
         label="Name"
-        error={fieldError(fieldErrors, "name")}
+        error={firstFieldError(fieldErrors, "name")}
       >
         <Input
           id="category-name"
           name="name"
           defaultValue={category?.name}
-          required
         />
       </Field>
       <Field
         id="category-description"
         label="Description"
-        error={fieldError(fieldErrors, "description")}
+        error={firstFieldError(fieldErrors, "description")}
       >
         <Textarea
           id="category-description"
@@ -88,7 +92,7 @@ export function CategoryForm({
       <Field
         id="category-sort"
         label="Sort order"
-        error={fieldError(fieldErrors, "sortOrder")}
+        error={firstFieldError(fieldErrors, "sortOrder")}
       >
         <Input
           id="category-sort"

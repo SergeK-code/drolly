@@ -32,7 +32,10 @@ export function slugFromName(name: string): string {
 
 export const productListQuerySchema = z
   .object({
-    q: z.preprocess(emptyToUndefined, z.string().max(80).optional()),
+    q: z.preprocess(
+      emptyToUndefined,
+      z.string().max(80, "Search is limited to 80 characters.").optional(),
+    ),
     categoryId: z.preprocess(emptyToUndefined, z.uuid().optional()),
     category: z.preprocess(emptyToUndefined, categorySlugSchema.optional()),
     sort: z.preprocess(

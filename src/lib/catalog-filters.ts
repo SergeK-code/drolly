@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export const catalogSearchQuerySchema = z
+  .string()
+  .trim()
+  .max(80, "Search is limited to 80 characters.");
+
 export const categorySlugSchema = z
   .string()
   .trim()

@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { validationFailed } from "@/server/http/api";
 
+export {
+  adminCategoryWriteSchema,
+  adminProductWriteSchema,
+  type AdminCategoryWrite,
+  type AdminProductWrite,
+} from "@/lib/admin-catalog-schemas";
+
 const emptyToUndefined = (value: unknown) => {
   if (typeof value !== "string") {
     return value;
@@ -10,63 +17,32 @@ const emptyToUndefined = (value: unknown) => {
   return trimmed.length === 0 ? undefined : trimmed;
 };
 
-const emptyToNull = (value: unknown) => {
-  if (typeof value !== "string") {
-    return value;
-  }
-
-  const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
-};
-
-export const adminIdSchema = z.uuid();
-
-export const adminCategoryWriteSchema = z
-  .object({
-    name: z.string().trim().min(1).max(80),
-    description: z.preprocess(
-      (value) => (value === undefined ? null : emptyToNull(value)),
-      z.string().max(500).nullable(),
-    ),
-    sortOrder: z.coerce.number().int().nonnegative().default(0),
-  })
-  .strict();
-
-export const adminProductWriteSchema = z
-  .object({
-    name: z.string().trim().min(1).max(120),
-    description: z.preprocess(
-      (value) => (value === undefined ? null : emptyToNull(value)),
-      z.string().max(2000).nullable(),
-    ),
-    categoryId: z.uuid(),
-    priceMinor: z.coerce.number().int().nonnegative(),
-    currency: z
-      .string()
-      .trim()
-      .transform((value) => value.toUpperCase())
-      .pipe(z.string().regex(/^[A-Z]{3}$/, "Enter a 3-letter currency code.")),
-    stockQuantity: z.coerce.number().int().nonnegative(),
-  })
-  .strict();
+export const adminIdSchema = z.uuid("This item was not found.");
 
 export const adminActiveSchema = z
   .object({
-    isActive: z.boolean(),
+    isActive: z.boolean({ error: "Choose active or archived." }),
   })
   .strict();
 
 export const adminListQuerySchema = z
   .object({
-    q: z.preprocess(emptyToUndefined, z.string().max(80).optional()),
-    categoryId: z.preprocess(emptyToUndefined, z.uuid().optional()),
+    q: z.preprocess(
+      emptyToUndefined,
+      z.string().max(80, "Search is limited to 80 characters.").optional(),
+    ),
+    categoryId: z.preprocess(
+      emptyToUndefined,
+      z.uuid("Choose a valid category.").optional(),
+    ),
     limit: z.coerce.number().int().min(1).max(24).default(12),
-    cursor: z.preprocess(emptyToUndefined, z.string().min(1).max(512).optional()),
+    cursor: z.preprocess(
+      emptyToUndefined,
+      z.string().min(1).max(512).optional(),
+    ),
   })
   .strict();
 
-export type AdminCategoryWrite = z.infer<typeof adminCategoryWriteSchema>;
-export type AdminProductWrite = z.infer<typeof adminProductWriteSchema>;
 export type AdminActiveWrite = z.infer<typeof adminActiveSchema>;
 export type AdminListQuery = z.infer<typeof adminListQuerySchema>;
 

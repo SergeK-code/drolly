@@ -10,7 +10,11 @@ vi.mock("@/server/repositories/profile-repository", () => ({
 }));
 
 import { AppError } from "@/server/http/api";
-import { requireAdmin, requireAuthenticatedUser } from "@/server/auth/protect";
+import {
+  requireAdmin,
+  requireAuthenticatedUser,
+  requireCustomer,
+} from "@/server/auth/protect";
 import type { PublicUser } from "@/server/auth/public-user";
 
 const customer: PublicUser = {
@@ -45,5 +49,12 @@ describe("requireAdmin", () => {
     } catch (error) {
       expect(error).toMatchObject({ status: 403, code: "FORBIDDEN" });
     }
+  });
+});
+
+describe("requireCustomer", () => {
+  it("allows a customer and rejects an admin", () => {
+    expect(requireCustomer(customer)).toEqual(customer);
+    expect(() => requireCustomer(admin)).toThrow(AppError);
   });
 });

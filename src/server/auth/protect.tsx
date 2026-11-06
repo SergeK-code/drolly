@@ -50,6 +50,16 @@ export function requireAdmin(user: PublicUser | null): PublicUser {
   return current;
 }
 
+export function requireCustomer(user: PublicUser | null): PublicUser {
+  const current = requireAuthenticatedUser(user);
+
+  if (current.role !== "customer") {
+    throw forbidden("Checkout is available to customer accounts.");
+  }
+
+  return current;
+}
+
 export async function redirectIfAuthenticated(returnTo: unknown): Promise<void> {
   await cookies();
   const user = await getCurrentUser();

@@ -116,7 +116,10 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
   );
   const currencies = new Set(priced.map((line) => line.currency));
   const displayCurrency = currencies.size === 1 ? [...currencies][0] : null;
-  const displayTotal = priced.reduce((total, line) => total + line.lineTotal, 0);
+  const displayTotal = priced.reduce(
+    (total, line) => total + line.lineTotal,
+    0,
+  );
   const loading = queries.some((query) => query.isPending);
 
   return (
@@ -192,14 +195,23 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
             ? "A single estimated total is unavailable until product prices can be refreshed in one currency."
             : "Prices and stock are checked again at checkout. This total is only a preview."}
         </p>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="w-fit"
-          onClick={() => setConfirmClear(true)}
-        >
-          Clear cart
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <TextLink
+            href="/checkout"
+            onClick={onContinue}
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground shadow-sm hover:bg-accent-hover"
+          >
+            Checkout
+          </TextLink>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="w-fit"
+            onClick={() => setConfirmClear(true)}
+          >
+            Clear cart
+          </Button>
+        </div>
       </div>
 
       <ConfirmModal
@@ -217,11 +229,15 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
   );
 }
 
-function refreshState(query: {
-  isPending: boolean;
-  isError: boolean;
-  error: unknown;
-} | undefined): CartRefreshState {
+function refreshState(
+  query:
+    | {
+        isPending: boolean;
+        isError: boolean;
+        error: unknown;
+      }
+    | undefined,
+): CartRefreshState {
   if (!query || query.isPending) {
     return "pending";
   }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ApiError, parseApiResponse } from "@/lib/api";
+import { ApiError, explainApiError, parseApiResponse } from "@/lib/api";
 
 describe("parseApiResponse", () => {
   it("returns data when success is true", async () => {
@@ -19,7 +19,7 @@ describe("parseApiResponse", () => {
         success: false,
         error: {
           code: "VALIDATION_ERROR",
-          message: "Validation failed",
+          message: "Enter your email address.",
           fieldErrors: { email: ["Required"] },
         },
       }),
@@ -28,9 +28,23 @@ describe("parseApiResponse", () => {
 
     await expect(parseApiResponse(response)).rejects.toMatchObject({
       name: "ApiError",
-      message: "Validation failed",
+      message: "Enter your email address.",
       code: "VALIDATION_ERROR",
       fieldErrors: { email: ["Required"] },
+    });
+  });
+
+  it("maps field errors into a readable submit message", () => {
+    expect(
+      explainApiError(
+        new ApiError("Check the highlighted fields and try again.", {
+          code: "VALIDATION_ERROR",
+          fieldErrors: { phone: ["Enter a valid phone number."] },
+        }),
+      ),
+    ).toEqual({
+      fieldErrors: { phone: ["Enter a valid phone number."] },
+      message: "Enter a valid phone number.",
     });
   });
 

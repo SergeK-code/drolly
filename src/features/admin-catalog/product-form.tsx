@@ -2,13 +2,18 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import type { AdminCategory, AdminProduct } from "@/features/admin-catalog/api";
-import { AdminApiError } from "@/features/admin-catalog/api";
-import { fieldError } from "@/features/admin-catalog/field-error";
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
 } from "@/features/admin-catalog/hooks";
+import { explainApiError } from "@/lib/api";
+import { adminProductWriteSchema } from "@/lib/admin-catalog-schemas";
 import { catalogImageUrl } from "@/lib/catalog-media";
+import {
+  firstFieldError,
+  validateForm,
+  type FieldErrors,
+} from "@/lib/zod-fields";
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { Input, Select, Textarea } from "@/ui/input";
@@ -28,7 +33,7 @@ export function ProductForm({
   const createMutation = useCreateProductMutation();
   const updateMutation = useUpdateProductMutation(product?.id ?? "");
   const pending = createMutation.isPending || updateMutation.isPending;
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,56 +49,54 @@ export function ProductForm({
     setFieldErrors({});
 
     const form = new FormData(event.currentTarget);
-    const input = {
+    const parsed = validateForm(adminProductWriteSchema, {
       name: String(form.get("name") ?? ""),
       description: String(form.get("description") ?? "").trim() || null,
       categoryId: String(form.get("categoryId") ?? ""),
-      priceMinor: Number(form.get("priceMinor") ?? 0),
+      priceMinor: form.get("priceMinor"),
       currency: String(form.get("currency") ?? "USD"),
-      stockQuantity: Number(form.get("stockQuantity") ?? 0),
-    };
+      stockQuantity: form.get("stockQuantity"),
+    });
+    if (!parsed.success) {
+      setFieldErrors(parsed.fieldErrors);
+      return;
+    }
 
     try {
       if (product) {
-        await updateMutation.mutateAsync(input);
+        await updateMutation.mutateAsync(parsed.data);
         showToast("success", "Product saved.");
       } else {
-        await createMutation.mutateAsync(input);
+        await createMutation.mutateAsync(parsed.data);
         showToast("success", "Product created.");
       }
       onSaved?.();
     } catch (submitError) {
-      showToast(
-        "error",
-        submitError instanceof Error
-          ? submitError.message
-          : "The request failed.",
-      );
-      if (submitError instanceof AdminApiError && submitError.fieldErrors) {
-        setFieldErrors(submitError.fieldErrors);
+      const explained = explainApiError(submitError);
+      setFieldErrors(explained.fieldErrors);
+      if (Object.keys(explained.fieldErrors).length === 0) {
+        showToast("error", explained.message);
       }
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full flex-col gap-4">
-      <Field id="product-name" label="Name" error={fieldError(fieldErrors, "name")}>
-        <Input
-          id="product-name"
-          name="name"
-          defaultValue={product?.name}
-          required
-        />
+    <form onSubmit={onSubmit} className="flex w-full flex-col gap-4" noValidate>
+      <Field
+        id="product-name"
+        label="Name"
+        error={firstFieldError(fieldErrors, "name")}
+      >
+        <Input id="product-name" name="name" defaultValue={product?.name} />
       </Field>
       <Field
         id="product-category"
         label="Category"
-        error={fieldError(fieldErrors, "categoryId")}
+        error={firstFieldError(fieldErrors, "categoryId")}
       >
         <Select
           id="product-category"
           name="categoryId"
-          required
           defaultValue={product?.categoryId ?? ""}
         >
           <option value="">Select a category</option>
@@ -108,7 +111,7 @@ export function ProductForm({
       <Field
         id="product-description"
         label="Description"
-        error={fieldError(fieldErrors, "description")}
+        error={firstFieldError(fieldErrors, "description")}
       >
         <Textarea
           id="product-description"
@@ -120,27 +123,25 @@ export function ProductForm({
       <Field
         id="product-price"
         label="Price (minor units)"
-        error={fieldError(fieldErrors, "priceMinor")}
+        error={firstFieldError(fieldErrors, "priceMinor")}
       >
         <Input
           id="product-price"
           name="priceMinor"
           type="number"
           defaultValue={String(product?.priceMinor ?? 0)}
-          required
           min={0}
         />
       </Field>
       <Field
         id="product-currency"
         label="Currency"
-        error={fieldError(fieldErrors, "currency")}
+        error={firstFieldError(fieldErrors, "currency")}
       >
         <Input
           id="product-currency"
           name="currency"
           defaultValue={product?.currency ?? "USD"}
-          required
         />
       </Field>
       <Field id="product-image" label="Image">
@@ -183,14 +184,13 @@ export function ProductForm({
       <Field
         id="product-stock"
         label="Stock"
-        error={fieldError(fieldErrors, "stockQuantity")}
+        error={firstFieldError(fieldErrors, "stockQuantity")}
       >
         <Input
           id="product-stock"
           name="stockQuantity"
           type="number"
           defaultValue={String(product?.stockQuantity ?? 0)}
-          required
           min={0}
         />
       </Field>

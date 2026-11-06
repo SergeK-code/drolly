@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import {
+  fieldErrorsFromZod,
+  messageFromFieldErrors,
+} from "@/lib/zod-fields";
 import { getRequestId } from "@/server/http/request-id";
 import { logger, safeErrorContext } from "@/server/logging/logger";
 
@@ -60,7 +64,7 @@ const PUBLIC_STATUS_MESSAGES: Record<number, string> = {
   403: "You do not have permission to do this.",
   404: "The requested resource was not found.",
   409: "This value is already used.",
-  422: "Validation failed",
+  422: "Check the highlighted fields and try again.",
   429: "Too many requests. Try again later.",
   500: "An unexpected error occurred.",
 };
@@ -91,7 +95,12 @@ export function forbidden(
 export function validationFailed(
   fieldErrors: Record<string, string[]>,
 ): AppError {
-  return new AppError("VALIDATION_ERROR", 422, "Validation failed", fieldErrors);
+  return new AppError(
+    "VALIDATION_ERROR",
+    422,
+    messageFromFieldErrors(fieldErrors),
+    fieldErrors,
+  );
 }
 
 export function rateLimited(): AppError {
@@ -102,9 +111,7 @@ export function rateLimited(): AppError {
   );
 }
 
-export function serviceUnavailable(
-  code = "DATABASE_ERROR",
-): AppError {
+export function serviceUnavailable(code = "DATABASE_ERROR"): AppError {
   return new AppError(code, 500, "The service is temporarily unavailable.");
 }
 
@@ -142,6 +149,14 @@ function classifyApiError(error: unknown): ClassifiedError {
   return { status: 500, code: "INTERNAL_ERROR" };
 }
 
+function publicErrorMessage(failure: ClassifiedError): string {
+  if (failure.fieldErrors && Object.keys(failure.fieldErrors).length > 0) {
+    return messageFromFieldErrors(failure.fieldErrors);
+  }
+
+  return PUBLIC_STATUS_MESSAGES[failure.status] ?? PUBLIC_STATUS_MESSAGES[500];
+}
+
 function apiErrorResponse(
   error: unknown,
   requestId: string,
@@ -151,8 +166,7 @@ function apiErrorResponse(
     success: false,
     error: {
       code: failure.code,
-      message:
-        PUBLIC_STATUS_MESSAGES[failure.status] ?? PUBLIC_STATUS_MESSAGES[500],
+      message: publicErrorMessage(failure),
       requestId,
       ...(failure.fieldErrors && Object.keys(failure.fieldErrors).length > 0
         ? { fieldErrors: failure.fieldErrors }
@@ -202,7 +216,9 @@ export function apiHandler(
     } catch (error) {
       const formatted = apiErrorResponse(error, requestId);
       const message =
-        error instanceof Error ? error.message : "An unexpected error occurred.";
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.";
       const details = {
         requestId,
         code: formatted.code,
@@ -232,17 +248,4 @@ export function apiHandler(
       return formatted.response;
     }
   };
-}
-
-function fieldErrorsFromZod(error: z.ZodError): Record<string, string[]> {
-  const fieldErrors: Record<string, string[]> = {};
-
-  for (const issue of error.issues) {
-    const field = issue.path.length > 0 ? issue.path.join(".") : "(root)";
-    const messages = fieldErrors[field] ?? [];
-    messages.push(issue.message);
-    fieldErrors[field] = messages;
-  }
-
-  return fieldErrors;
 }
