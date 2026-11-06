@@ -39,6 +39,8 @@ export const checkoutAddressSchema = z
   })
   .strict();
 
+export const addressIdSchema = z.uuid("This address was not found.");
+
 export const addressWriteSchema = checkoutAddressSchema
   .extend({
     label: z.preprocess(

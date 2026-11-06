@@ -3,6 +3,7 @@ import { orderStatusCodeSchema } from "@/lib/order-status";
 import { validationFailed } from "@/server/http/api";
 
 export {
+  addressIdSchema,
   addressWriteSchema,
   checkoutAddressSchema,
   checkoutBodySchema,

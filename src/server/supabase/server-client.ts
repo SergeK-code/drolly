@@ -1,12 +1,13 @@
 import "server-only";
 
+import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getEnv } from "@/lib/env";
 import { supabaseCookieOptions } from "@/server/supabase/cookie-options";
 import type { Database } from "@/server/supabase/database.types";
 
-export async function createSupabaseServerClient() {
+export const createSupabaseServerClient = cache(async function createSupabaseServerClient() {
   const env = getEnv();
   const cookieStore = await cookies();
 
@@ -27,4 +28,4 @@ export async function createSupabaseServerClient() {
       },
     },
   });
-}
+});

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { AppError } from "@/server/http/api";
 import {
+  addressIdSchema,
   checkoutBodySchema,
   rejectCheckoutPrivilegedFields,
 } from "@/server/orders/schemas";
@@ -19,6 +20,17 @@ const valid = {
     area: "Center",
   },
 };
+
+describe("addressIdSchema", () => {
+  it("rejects an invalid id with an address message", () => {
+    const parsed = addressIdSchema.safeParse("not-an-id");
+    expect(parsed.success).toBe(false);
+    if (parsed.success) {
+      return;
+    }
+    expect(parsed.error.issues[0]?.message).toBe("This address was not found.");
+  });
+});
 
 describe("checkoutBodySchema", () => {
   it("accepts product ids, quantities and an address snapshot", () => {

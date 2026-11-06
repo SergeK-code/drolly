@@ -1,22 +1,7 @@
-import { getCurrentUser } from "@/server/auth/protect";
-import { Card } from "@/ui/card";
-import { TextLink } from "@/ui/text-link";
+import { ProfileForm } from "@/features/account/profile-form";
 
-export default async function AccountPage() {
-  const user = await getCurrentUser();
+export const instant = false;
 
-  if (!user) {
-    return null;
-  }
-
-  return (
-    <Card>
-      <p className="text-base text-muted">
-        Signed in as {user.fullName || user.email} ({user.role}).
-      </p>
-      <p className="mt-3">
-        <TextLink href="/account/orders">View orders</TextLink>
-      </p>
-    </Card>
-  );
+export default function AccountPage() {
+  return <ProfileForm />;
 }

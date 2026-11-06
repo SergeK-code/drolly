@@ -428,6 +428,12 @@ export type Database = {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      sync_default_customer_address: {
+        Args: {
+          p_address_id: string;
+        };
+        Returns: undefined;
+      };
       place_cod_order: {
         Args: {
           p_idempotency_key: string;

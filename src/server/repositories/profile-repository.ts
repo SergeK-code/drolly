@@ -1,11 +1,14 @@
 import "server-only";
 
+import { cache } from "react";
 import type { AppRole } from "@/server/auth/public-user";
+import { notFound, serviceUnavailable } from "@/server/http/api";
 import { logger } from "@/server/logging/logger";
 import { createSupabaseServerClient } from "@/server/supabase/server-client";
 
 export type ProfileRecord = {
   fullName: string;
+  phone: string | null;
   role: AppRole;
 };
 
@@ -13,13 +16,13 @@ function asAppRole(code: string | null | undefined): AppRole {
   return code === "admin" ? "admin" : "customer";
 }
 
-export async function getProfileByUserId(
+export const getProfileByUserId = cache(async function getProfileByUserId(
   userId: string,
 ): Promise<ProfileRecord | null> {
   const supabase = await createSupabaseServerClient();
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("full_name, role_id")
+    .select("full_name, phone, app_roles(code)")
     .eq("id", userId)
     .maybeSingle();
 
@@ -27,20 +30,25 @@ export async function getProfileByUserId(
     return null;
   }
 
-  const { data: role, error: roleError } = await supabase
-    .from("app_roles")
-    .select("code")
-    .eq("id", profile.role_id)
-    .maybeSingle();
+  return {
+    fullName: profile.full_name,
+    phone: profile.phone,
+    role: asAppRole(roleCode(profile.app_roles)),
+  };
+});
 
-  if (roleError) {
+function roleCode(
+  role: { code: string } | { code: string }[] | null,
+): string | null {
+  if (!role) {
     return null;
   }
 
-  return {
-    fullName: profile.full_name,
-    role: asAppRole(role?.code),
-  };
+  if (Array.isArray(role)) {
+    return role[0]?.code ?? null;
+  }
+
+  return role.code;
 }
 
 export async function ensureCustomerProfile(
@@ -61,7 +69,7 @@ export async function ensureCustomerProfile(
 
   if (roleError || !customerRole) {
     logger.error({ userId }, "Customer role lookup failed");
-    return { fullName, role: "customer" };
+    return { fullName, phone: null, role: "customer" };
   }
 
   const { error: insertError } = await supabase.from("profiles").insert({
@@ -77,5 +85,38 @@ export async function ensureCustomerProfile(
     }
   }
 
-  return (await getProfileByUserId(userId)) ?? { fullName, role: "customer" };
+  return (
+    (await getProfileByUserId(userId)) ?? {
+      fullName,
+      phone: null,
+      role: "customer",
+    }
+  );
+}
+
+export async function updateOwnProfile(
+  userId: string,
+  input: { fullName: string; phone: string | null },
+): Promise<{ fullName: string; phone: string | null }> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: input.fullName,
+      phone: input.phone,
+    })
+    .eq("id", userId)
+    .select("full_name, phone")
+    .maybeSingle();
+
+  if (error) {
+    logger.warn({ code: error.code }, "Profile update failed");
+    throw serviceUnavailable();
+  }
+
+  if (!data) {
+    throw notFound("Profile not found.");
+  }
+
+  return { fullName: data.full_name, phone: data.phone };
 }

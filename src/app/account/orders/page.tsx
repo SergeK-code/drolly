@@ -1,5 +1,7 @@
 import { OrderList } from "@/features/orders/order-list";
 
+export const instant = false;
+
 export default function AccountOrdersPage() {
   return (
     <>

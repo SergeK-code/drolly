@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import {
   conflict,
   forbidden,
@@ -181,7 +183,9 @@ export async function updateOrderStatusRow(input: {
   return toPublicOrder(data as OrderRow, { includeCustomer: true });
 }
 
-async function statusIdForCode(code: OrderStatusCode): Promise<number> {
+const statusIdForCode = cache(async function statusIdForCode(
+  code: OrderStatusCode,
+): Promise<number> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("order_statuses")
@@ -194,7 +198,7 @@ async function statusIdForCode(code: OrderStatusCode): Promise<number> {
   }
 
   return data.id;
-}
+});
 
 function mapCheckoutError(error: { message?: string; code?: string }): never {
   const code = error.message?.match(/CHECKOUT_[A-Z]+/)?.[0];

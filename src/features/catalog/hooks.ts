@@ -1,6 +1,10 @@
 "use client";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { fetchCategories, fetchProduct, fetchProducts } from "@/features/catalog/api";
 import { catalogQueryKey } from "@/features/catalog/query-keys";
 
@@ -8,6 +12,7 @@ export function useCategoriesQuery() {
   return useQuery({
     queryKey: catalogQueryKey.categories(),
     queryFn: fetchCategories,
+    staleTime: 60_000,
   });
 }
 
@@ -26,6 +31,7 @@ export function useProductListQuery(input: {
         page: pageParam,
       }),
     initialPageParam: 1,
+    placeholderData: keepPreviousData,
     getNextPageParam: (lastPage, pages) =>
       lastPage.hasMore ? pages.length + 1 : undefined,
   });

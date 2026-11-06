@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   createAddress,
   fetchAddresses,
@@ -41,6 +46,7 @@ export function useAdminOrdersQuery(status?: string) {
   return useQuery({
     queryKey: [...ordersQueryKey.admin(), status ?? "all"],
     queryFn: () => fetchAdminOrders({ page: 1, status }),
+    placeholderData: keepPreviousData,
   });
 }
 

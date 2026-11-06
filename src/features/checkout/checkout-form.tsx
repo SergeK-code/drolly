@@ -12,6 +12,7 @@ import {
   useCreateAddressMutation,
 } from "@/features/orders/hooks";
 import { formatMoney } from "@/features/orders/money";
+import { usePublicStoreSettingsQuery } from "@/features/store/hooks";
 import { ApiError, explainApiError } from "@/lib/api";
 import {
   addressWriteSchema,
@@ -83,6 +84,8 @@ export function CheckoutForm() {
   const checkout = useCheckoutMutation();
   const saveAddress = useCreateAddressMutation();
   const { showToast } = useToast();
+  const settingsQuery = usePublicStoreSettingsQuery();
+  const settings = settingsQuery.data?.settings;
   const productQueries = useQueries({
     queries: items.map((item) => ({
       queryKey: catalogQueryKey.product(item.productId),
@@ -260,8 +263,12 @@ export function CheckoutForm() {
           ))}
         </ul>
         <p className="mt-3 text-xs text-muted">
-          Prices, stock and delivery fee are calculated on the server. Payment is
-          cash on delivery.
+          Prices, stock and delivery fee are calculated on the server from current
+          store settings
+          {settings
+            ? ` (${formatMoney(settings.deliveryFeeMinor, settings.currency)} delivery, ${formatMoney(settings.minimumOrderMinor, settings.currency)} minimum)`
+            : ""}
+          . Payment is cash on delivery.
         </p>
       </Card>
 

@@ -40,7 +40,9 @@ export function AdminShell({ children }: { children: ReactNode }) {
         >
           {adminNavItems.map((item) => {
             const selected =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
+              item.href === "/admin"
+                ? pathname === "/admin"
+                : pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}

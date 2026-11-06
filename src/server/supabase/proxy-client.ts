@@ -5,7 +5,27 @@ import { NextResponse, type NextRequest } from "next/server";
 import { supabaseCookieOptions } from "@/server/supabase/cookie-options";
 import type { Database } from "@/server/supabase/database.types";
 
+export function shouldRefreshAuth(
+  pathname: string,
+  cookieNames: string[],
+): boolean {
+  if (pathname === "/api" || pathname.startsWith("/api/")) {
+    return false;
+  }
+
+  return cookieNames.some((name) => name.includes("-auth-token"));
+}
+
 export async function updateSession(request: NextRequest) {
+  if (
+    !shouldRefreshAuth(
+      request.nextUrl.pathname,
+      request.cookies.getAll().map((cookie) => cookie.name),
+    )
+  ) {
+    return NextResponse.next({ request });
+  }
+
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 

@@ -7,5 +7,6 @@ export function useSession() {
   return useQuery({
     queryKey: sessionQueryKey,
     queryFn: fetchSession,
+    staleTime: 60_000,
   });
 }

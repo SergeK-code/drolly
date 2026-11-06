@@ -1,6 +1,6 @@
 import "server-only";
 
-import { Suspense, type ReactNode } from "react";
+import { cache, Suspense, type ReactNode } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
@@ -10,7 +10,7 @@ import { toPublicUser, type PublicUser } from "@/server/auth/public-user";
 import { getProfileByUserId } from "@/server/repositories/profile-repository";
 import { createSupabaseServerClient } from "@/server/supabase/server-client";
 
-export async function getCurrentUser(): Promise<PublicUser | null> {
+export const getCurrentUser = cache(async function getCurrentUser(): Promise<PublicUser | null> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.getUser();
 
@@ -26,7 +26,7 @@ export async function getCurrentUser(): Promise<PublicUser | null> {
     fullName: profile?.fullName ?? "",
     role: profile?.role ?? "customer",
   });
-}
+});
 
 export async function requireAdminFromSession(): Promise<PublicUser> {
   return requireAdmin(await getCurrentUser());
@@ -99,7 +99,6 @@ async function Gate({
   requireAdmin: boolean;
 }) {
   await connection();
-  await cookies();
   const user = await getCurrentUser();
 
   if (!user) {

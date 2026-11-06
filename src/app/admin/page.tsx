@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
+import { AdminDashboard } from "@/features/admin-dashboard/dashboard";
+
+export const instant = false;
 
 export default function AdminPage() {
-  redirect("/admin/products");
+  return <AdminDashboard />;
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSyncExternalStore, type ReactNode } from "react";
 import { useSession } from "@/features/auth/hooks";
+import { usePublicStoreSettingsQuery } from "@/features/store/hooks";
 import { headerLinks } from "@/features/auth/header-links";
 import { SignOutButton } from "@/features/auth/sign-out-button";
 import { cartItemCount } from "@/features/cart/cart-state";
@@ -11,12 +12,14 @@ import { TextLink } from "@/ui/text-link";
 
 export function SiteHeader() {
   const sessionQuery = useSession();
+  const settingsQuery = usePublicStoreSettingsQuery();
+  const storeName = settingsQuery.data?.settings.storeName ?? "Drolly";
 
   const user = sessionQuery.data?.user ?? null;
   const links = headerLinks(user);
 
   return (
-    <HeaderBar>
+    <HeaderBar storeName={storeName}>
       {links.map((link) =>
         link.href === "/cart" ? (
           <CartHeaderLink key={link.href} href={link.href} label={link.label} />
@@ -56,7 +59,13 @@ function subscribeCartHydration(onChange: () => void): () => void {
   return useCart.persist.onFinishHydration(onChange);
 }
 
-function HeaderBar({ children }: { children: ReactNode }) {
+function HeaderBar({
+  storeName,
+  children,
+}: {
+  storeName: string;
+  children: ReactNode;
+}) {
   return (
     <header className="sticky top-0 z-40 shrink-0 border-b border-border bg-surface/90 shadow-sm backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
@@ -64,7 +73,7 @@ function HeaderBar({ children }: { children: ReactNode }) {
           href="/"
           className="text-sm font-semibold tracking-tight text-accent focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          Drolly
+          {storeName}
         </Link>
         <nav
           aria-label="Site"
