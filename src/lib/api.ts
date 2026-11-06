@@ -13,31 +13,31 @@ export class ApiError extends Error {
   }
 }
 
-type ErrorPayload = {
+type ApiPayload = {
   success?: unknown;
+  data?: unknown;
   error?: {
     code?: string;
     message?: string;
-    details?: { fieldErrors?: Record<string, string[]> };
+    fieldErrors?: Record<string, string[]>;
   };
-  data?: unknown;
 };
 
 export async function parseApiResponse<T>(response: Response): Promise<T> {
-  let payload: ErrorPayload;
+  let payload: ApiPayload;
 
   try {
-    payload = (await response.json()) as ErrorPayload;
+    payload = (await response.json()) as ApiPayload;
   } catch {
     throw new ApiError("The request failed.");
   }
 
-  if (payload.success !== true) {
-    throw new ApiError(payload.error?.message ?? "The request failed.", {
-      code: payload.error?.code,
-      fieldErrors: payload.error?.details?.fieldErrors,
-    });
+  if (payload.success === true) {
+    return payload.data as T;
   }
 
-  return payload.data as T;
+  throw new ApiError(payload.error?.message ?? "The request failed.", {
+    code: payload.error?.code,
+    fieldErrors: payload.error?.fieldErrors,
+  });
 }

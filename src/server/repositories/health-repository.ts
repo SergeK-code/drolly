@@ -1,6 +1,6 @@
 import "server-only";
 
-import { AppError } from "@/server/http/api";
+import { serviceUnavailable } from "@/server/http/api";
 import { createSupabaseServerClient } from "@/server/supabase/server-client";
 
 export async function assertStoreSettingsReadable(): Promise<void> {
@@ -12,10 +12,6 @@ export async function assertStoreSettingsReadable(): Promise<void> {
     .limit(1);
 
   if (error) {
-    throw new AppError(
-      "DATABASE_ERROR",
-      500,
-      "The service is temporarily unavailable.",
-    );
+    throw serviceUnavailable();
   }
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AppError } from "@/server/http/api";
+import { validationFailed } from "@/server/http/api";
 
 const emailSchema = z
   .string()
@@ -35,11 +35,8 @@ export function rejectClientRoleFields(body: unknown): void {
   }
 
   if ("role" in body || "role_id" in body) {
-    throw new AppError(
-      "VALIDATION_ERROR",
-      400,
-      "The submitted data is invalid.",
-      { fieldErrors: { role: ["Role cannot be set from the client."] } },
-    );
+    throw validationFailed({
+      role: ["Role cannot be set from the client."],
+    });
   }
 }

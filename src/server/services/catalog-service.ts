@@ -1,4 +1,4 @@
-import { AppError } from "@/server/http/api";
+import { notFound } from "@/server/http/api";
 import {
   decodeCategoryCursor,
   decodeProductCursor,
@@ -53,7 +53,7 @@ export async function getCategory(slug: string): Promise<PublicCategory> {
   const row = await getPublicCategoryBySlug(slug);
 
   if (!row || !isPublicCategoryRow(row)) {
-    throw new AppError("NOT_FOUND", 404, "Category not found.");
+    throw notFound("Category not found.");
   }
 
   return toPublicCategory(row);
@@ -96,7 +96,7 @@ export async function getProduct(idOrSlug: string): Promise<PublicProduct> {
   const row = await getPublicProductByIdOrSlug(idOrSlug);
 
   if (!row || !isPublicProductRow(row)) {
-    throw new AppError("NOT_FOUND", 404, "Product not found.");
+    throw notFound("Product not found.");
   }
 
   return toPublicProduct(row);

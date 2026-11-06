@@ -110,7 +110,7 @@ describe("createProduct", () => {
     });
 
     await expect(createProduct(request, "req_2")).rejects.toMatchObject({
-      name: "ZodError",
+      name: "AppError",
     });
     expect(createAdminProduct).not.toHaveBeenCalled();
   });

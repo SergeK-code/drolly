@@ -15,7 +15,7 @@ import {
 } from "@/server/auth/schemas";
 import { assertSameOrigin } from "@/server/http/assert-same-origin";
 import { getClientIp } from "@/server/http/client-ip";
-import { jsonSuccess } from "@/server/http/api";
+import { jsonSuccess, validateData } from "@/server/http/api";
 import { parseJsonBody } from "@/server/http/parse-request";
 import { assertWithinRateLimit } from "@/server/http/rate-limit";
 
@@ -25,7 +25,7 @@ export async function register(request: Request, requestId: string) {
 
   const body = await parseJsonBody(request);
   rejectClientRoleFields(body);
-  const input = registerSchema.parse(body);
+  const input = validateData(registerSchema, body);
   const data = await registerUser(input);
 
   return jsonSuccess(data, { status: 201, requestId });
@@ -36,7 +36,7 @@ export async function signIn(request: Request, requestId: string) {
   assertWithinRateLimit(authRateLimiter, `sign-in:${getClientIp(request)}`);
 
   const body = await parseJsonBody(request);
-  const input = signInSchema.parse(body);
+  const input = validateData(signInSchema, body);
   const data = await signInUser(input);
 
   return jsonSuccess(data, { requestId });

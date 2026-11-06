@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AppError } from "@/server/http/api";
+import { AppError, validationFailed } from "@/server/http/api";
 
 const productCursorSchema = z
   .object({
@@ -68,7 +68,5 @@ export function pageOffset(page: number, limit: number): number {
 }
 
 function invalidCursorError(): AppError {
-  return new AppError("VALIDATION_ERROR", 400, "The submitted data is invalid.", {
-    fieldErrors: { cursor: ["Invalid cursor."] },
-  });
+  return validationFailed({ cursor: ["Invalid cursor."] });
 }

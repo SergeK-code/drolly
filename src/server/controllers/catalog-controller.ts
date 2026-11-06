@@ -1,6 +1,6 @@
 import "server-only";
 
-import { jsonSuccess } from "@/server/http/api";
+import { jsonSuccess, validateData } from "@/server/http/api";
 import { getQueryParams } from "@/server/http/parse-request";
 import {
   categoryListQuerySchema,
@@ -16,25 +16,25 @@ import {
 } from "@/server/services/catalog-service";
 
 export async function getCategoryList(request: Request, requestId: string) {
-  const query = categoryListQuerySchema.parse(getQueryParams(request));
+  const query = validateData(categoryListQuerySchema, getQueryParams(request));
   const data = await listCategories(query);
   return jsonSuccess(data, { requestId });
 }
 
 export async function getCategoryDetail(request: Request, requestId: string) {
-  const slug = categorySlugSchema.parse(lastPathSegment(request));
+  const slug = validateData(categorySlugSchema, lastPathSegment(request));
   const data = await getCategory(slug);
   return jsonSuccess({ category: data }, { requestId });
 }
 
 export async function getProductList(request: Request, requestId: string) {
-  const query = productListQuerySchema.parse(getQueryParams(request));
+  const query = validateData(productListQuerySchema, getQueryParams(request));
   const data = await listProducts(query);
   return jsonSuccess(data, { requestId });
 }
 
 export async function getProductDetail(request: Request, requestId: string) {
-  const idOrSlug = productIdOrSlugSchema.parse(lastPathSegment(request));
+  const idOrSlug = validateData(productIdOrSlugSchema, lastPathSegment(request));
   const data = await getProduct(idOrSlug);
   return jsonSuccess({ product: data }, { requestId });
 }

@@ -1,4 +1,4 @@
-import { AppError } from "@/server/http/api";
+import { conflict, notFound, validationFailed } from "@/server/http/api";
 import { requireAdminFromSession } from "@/server/auth/protect";
 import {
   decodeCategoryCursor,
@@ -64,7 +64,7 @@ export async function getAdminCategory(id: string): Promise<AdminCategory> {
   await requireAdminFromSession();
   const row = await getAdminCategoryById(id);
   if (!row) {
-    throw new AppError("NOT_FOUND", 404, "Category not found.");
+    throw notFound("Category not found.");
   }
 
   return toAdminCategory(row);
@@ -90,7 +90,7 @@ export async function updateAdminCategory(
 ): Promise<AdminCategory> {
   await requireAdminFromSession();
   if (!(await getAdminCategoryById(id))) {
-    throw new AppError("NOT_FOUND", 404, "Category not found.");
+    throw notFound("Category not found.");
   }
   const slug = await uniqueCategorySlug(slugFromName(input.name), id);
   const row = await updateCategory(id, {
@@ -108,7 +108,7 @@ export async function setAdminCategoryActive(
 ): Promise<AdminCategory> {
   await requireAdminFromSession();
   if (!(await getAdminCategoryById(id))) {
-    throw new AppError("NOT_FOUND", 404, "Category not found.");
+    throw notFound("Category not found.");
   }
   const row = await setCategoryActive(id, isActive);
   return toAdminCategory(row);
@@ -117,16 +117,13 @@ export async function setAdminCategoryActive(
 export async function deleteAdminCategory(id: string): Promise<void> {
   await requireAdminFromSession();
   if (!(await getAdminCategoryById(id))) {
-    throw new AppError("NOT_FOUND", 404, "Category not found.");
+    throw notFound("Category not found.");
   }
 
   const productCount = await countProductsForCategory(id);
   if (productCount > 0) {
-    throw new AppError(
-      "CONFLICT",
-      409,
+    throw conflict(
       "This category cannot be deleted because it is used by products.",
-      { productCount },
     );
   }
 
@@ -161,7 +158,7 @@ export async function getAdminProduct(id: string): Promise<AdminProduct> {
   await requireAdminFromSession();
   const row = await getAdminProductById(id);
   if (!row) {
-    throw new AppError("NOT_FOUND", 404, "Product not found.");
+    throw notFound("Product not found.");
   }
 
   return toAdminProduct(row);
@@ -224,8 +221,8 @@ export async function deleteAdminProduct(id: string): Promise<void> {
 async function assertCategoryExists(id: string): Promise<void> {
   const row = await getAdminCategoryById(id);
   if (!row) {
-    throw new AppError("VALIDATION_ERROR", 400, "The submitted data is invalid.", {
-      fieldErrors: { categoryId: ["Category does not exist."] },
+    throw validationFailed({
+      categoryId: ["Category does not exist."],
     });
   }
 }
@@ -233,7 +230,7 @@ async function assertCategoryExists(id: string): Promise<void> {
 async function assertProductExists(id: string): Promise<void> {
   const row = await getAdminProductById(id);
   if (!row) {
-    throw new AppError("NOT_FOUND", 404, "Product not found.");
+    throw notFound("Product not found.");
   }
 }
 
@@ -266,5 +263,5 @@ async function uniqueSlug(
     }
   }
 
-  throw new AppError("CONFLICT", 409, "Could not create a unique slug.");
+  throw conflict("Could not create a unique slug.");
 }

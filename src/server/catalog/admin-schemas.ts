@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { AppError } from "@/server/http/api";
+import { validationFailed } from "@/server/http/api";
 
 const emptyToUndefined = (value: unknown) => {
   if (typeof value !== "string") {
@@ -91,12 +91,9 @@ export function rejectPrivilegedCatalogFields(body: unknown): void {
   const record = body as Record<string, unknown>;
   for (const field of BANNED_FIELDS) {
     if (field in record) {
-      throw new AppError(
-        "VALIDATION_ERROR",
-        400,
-        "The submitted data is invalid.",
-        { fieldErrors: { [field]: ["This field cannot be set from the client."] } },
-      );
+      throw validationFailed({
+        [field]: ["This field cannot be set from the client."],
+      });
     }
   }
 }

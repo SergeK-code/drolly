@@ -6,7 +6,7 @@ import {
   requireAdminFromSession,
 } from "@/server/auth/protect";
 import type { RegisterInput, SignInInput } from "@/server/auth/schemas";
-import { AppError } from "@/server/http/api";
+import { AppError, unauthenticated } from "@/server/http/api";
 import { logger } from "@/server/logging/logger";
 import { ensureCustomerProfile } from "@/server/repositories/profile-repository";
 import { createSupabaseServerClient } from "@/server/supabase/server-client";
@@ -56,7 +56,7 @@ export async function signInUser(input: SignInInput): Promise<AuthResult> {
   });
 
   if (error || !data.user || !data.session) {
-    throw new AppError("UNAUTHENTICATED", 401, "Invalid email or password.");
+    throw unauthenticated("Invalid email or password.");
   }
 
   const profile = await ensureCustomerProfile(data.user.id, "");

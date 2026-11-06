@@ -59,29 +59,29 @@ Every admin API route/service checks admin authorization independently. Hiding a
 
 Use one error class and one formatter.
 
-Suggested API error shape:
+Controllers validate untrusted input with `validateData`. Services throw `notFound()`, `conflict()`, `validationFailed()`, or `AppError`. `apiHandler` formats every thrown error.
+
+Success and error share one envelope:
 
 ```json
 {
   "success": false,
   "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "The submitted data is invalid.",
-    "details": {
-      "fieldErrors": {}
-    },
-    "requestId": "..."
+    "code": "CONFLICT",
+    "message": "This value is already used.",
+    "requestId": "...",
+    "fieldErrors": { "name": ["This value is already used."] }
   }
 }
 ```
 
 Rules:
-- `AppError` contains a safe code, HTTP status, public message and optional safe details.
-- One `formatApiError(error, requestId)` maps known errors to the response shape.
+- `AppError` contains a code, HTTP status, developer message and optional `fieldErrors`.
+- One `formatApiError` maps known errors to the envelope. Clients see a dedicated public `message` per status, never thrown internals.
 - Unknown errors become HTTP 500 with a generic public message.
 - Log the original error server-side with request ID; never return stack traces, SQL, table names, secrets or raw Supabase error messages.
-- Route handlers use one wrapper or one shared `handleApiError` function. Avoid repeated custom try/catch formatting.
-- Use correct HTTP statuses: 400 validation, 401 unauthenticated, 403 forbidden, 404 not found, 409 conflict, 429 rate limit, 500 unexpected.
+- Route handlers use `apiHandler`. Avoid repeated custom try/catch formatting.
+- Use correct HTTP statuses: 400 bad request, 401 unauthenticated, 403 forbidden, 404 not found, 409 conflict, 422 validation, 429 rate limit, 500 unexpected.
 
 ## 7. Structured logging
 

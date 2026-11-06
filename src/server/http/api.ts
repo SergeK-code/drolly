@@ -6,19 +6,19 @@ import { logger, safeErrorContext } from "@/server/logging/logger";
 export class AppError extends Error {
   readonly code: string;
   readonly status: number;
-  readonly details?: unknown;
+  readonly fieldErrors?: Record<string, string[]>;
 
   constructor(
     code: string,
     status: number,
     message: string,
-    details?: unknown,
+    fieldErrors?: Record<string, string[]>,
   ) {
     super(message);
     this.name = "AppError";
     this.code = code;
     this.status = status;
-    this.details = details;
+    this.fieldErrors = fieldErrors;
   }
 }
 
@@ -27,8 +27,8 @@ export type ApiErrorBody = {
   error: {
     code: string;
     message: string;
-    details?: unknown;
     requestId: string;
+    fieldErrors?: Record<string, string[]>;
   };
 };
 
@@ -51,57 +51,80 @@ const PUBLIC_STATUS_MESSAGES: Record<number, string> = {
   403: "You do not have permission to do this.",
   404: "The requested resource was not found.",
   409: "This value is already used.",
+  422: "Validation failed",
   429: "Too many requests. Try again later.",
   500: "An unexpected error occurred.",
 };
+
+export function notFound(
+  message = "The requested resource was not found.",
+): AppError {
+  return new AppError("NOT_FOUND", 404, message);
+}
+
+export function conflict(
+  message = "This value is already used.",
+  fieldErrors?: Record<string, string[]>,
+): AppError {
+  return new AppError("CONFLICT", 409, message, fieldErrors);
+}
+
+export function unauthenticated(message = "Sign in to continue."): AppError {
+  return new AppError("UNAUTHENTICATED", 401, message);
+}
+
+export function forbidden(
+  message = "You do not have permission to do this.",
+): AppError {
+  return new AppError("FORBIDDEN", 403, message);
+}
+
+export function validationFailed(
+  fieldErrors: Record<string, string[]>,
+): AppError {
+  return new AppError("VALIDATION_ERROR", 422, "Validation failed", fieldErrors);
+}
+
+export function rateLimited(): AppError {
+  return new AppError(
+    "RATE_LIMITED",
+    429,
+    "Too many requests. Please try again later.",
+  );
+}
+
+export function serviceUnavailable(
+  code = "DATABASE_ERROR",
+): AppError {
+  return new AppError(code, 500, "The service is temporarily unavailable.");
+}
+
+export function validateData<T>(schema: z.ZodType<T>, data: unknown): T {
+  const result = schema.safeParse(data);
+  if (!result.success) {
+    throw validationFailed(fieldErrorsFromZod(result.error));
+  }
+  return result.data;
+}
 
 export function formatApiError(
   error: unknown,
   requestId: string,
 ): { status: number; body: ApiErrorBody } {
   if (error instanceof AppError) {
-    return {
-      status: error.status,
-      body: {
-        success: false,
-        error: {
-          code: error.code,
-          message:
-            PUBLIC_STATUS_MESSAGES[error.status] ??
-            "An unexpected error occurred.",
-          details: error.details,
-          requestId,
-        },
-      },
-    };
+    return errorResponse(error.status, error.code, requestId, error.fieldErrors);
   }
 
   if (error instanceof z.ZodError) {
-    return {
-      status: 400,
-      body: {
-        success: false,
-        error: {
-          code: "VALIDATION_ERROR",
-          message: "The submitted data is invalid.",
-          details: { fieldErrors: fieldErrorsFromZod(error) },
-          requestId,
-        },
-      },
-    };
+    return errorResponse(
+      422,
+      "VALIDATION_ERROR",
+      requestId,
+      fieldErrorsFromZod(error),
+    );
   }
 
-  return {
-    status: 500,
-    body: {
-      success: false,
-      error: {
-        code: "INTERNAL_ERROR",
-        message: "An unexpected error occurred.",
-        requestId,
-      },
-    },
-  };
+  return errorResponse(500, "INTERNAL_ERROR", requestId);
 }
 
 export function apiHandler(
@@ -131,7 +154,8 @@ export function apiHandler(
       return response;
     } catch (error) {
       const formatted = formatApiError(error, requestId);
-      const message = formatted.body.error.message;
+      const message =
+        error instanceof Error ? error.message : formatted.body.error.message;
 
       if (formatted.status >= 500) {
         logger.error(
@@ -151,25 +175,45 @@ export function apiHandler(
         );
       }
 
-      const response = NextResponse.json(formatted.body, {
-        status: formatted.status,
-        headers: { "x-request-id": requestId },
-      });
-
       logger.info(
         {
           requestId,
           method: request.method,
           path,
-          statusCode: response.status,
+          statusCode: formatted.status,
           durationMs: Date.now() - startedAt,
           message,
         },
         "API request failed",
       );
 
-      return response;
+      return NextResponse.json(formatted.body, {
+        status: formatted.status,
+        headers: { "x-request-id": requestId },
+      });
     }
+  };
+}
+
+function errorResponse(
+  status: number,
+  code: string,
+  requestId: string,
+  fieldErrors?: Record<string, string[]>,
+): { status: number; body: ApiErrorBody } {
+  return {
+    status,
+    body: {
+      success: false,
+      error: {
+        code,
+        message: PUBLIC_STATUS_MESSAGES[status] ?? PUBLIC_STATUS_MESSAGES[500],
+        requestId,
+        ...(fieldErrors && Object.keys(fieldErrors).length > 0
+          ? { fieldErrors }
+          : {}),
+      },
+    },
   };
 }
 
@@ -177,10 +221,10 @@ function fieldErrorsFromZod(error: z.ZodError): Record<string, string[]> {
   const fieldErrors: Record<string, string[]> = {};
 
   for (const issue of error.issues) {
-    const path = issue.path.length > 0 ? issue.path.join(".") : "_root";
-    const messages = fieldErrors[path] ?? [];
+    const field = issue.path.length > 0 ? issue.path.join(".") : "(root)";
+    const messages = fieldErrors[field] ?? [];
     messages.push(issue.message);
-    fieldErrors[path] = messages;
+    fieldErrors[field] = messages;
   }
 
   return fieldErrors;

@@ -95,7 +95,7 @@ describe("createAdminProduct", () => {
 
     await expect(createAdminProduct(productInput)).rejects.toMatchObject({
       code: "VALIDATION_ERROR",
-      status: 400,
+      status: 422,
     });
     expect(insertProduct).not.toHaveBeenCalled();
   });
@@ -260,7 +260,6 @@ describe("deleteAdminCategory", () => {
     await expect(deleteAdminCategory(categoryId)).rejects.toMatchObject({
       code: "CONFLICT",
       status: 409,
-      details: { productCount: 2 },
     });
     expect(deleteCategory).not.toHaveBeenCalled();
   });

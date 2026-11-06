@@ -1,6 +1,6 @@
 import "server-only";
 
-import { AppError } from "@/server/http/api";
+import { conflict, notFound, serviceUnavailable } from "@/server/http/api";
 import type {
   CatalogCategoryRow,
   CatalogProductRow,
@@ -289,7 +289,7 @@ export async function updateCategory(
 
   throwIfCatalogWriteError(error, "slug");
   if (!data) {
-    throw new AppError("NOT_FOUND", 404, "Category not found.");
+    throw notFound("Category not found.");
   }
 
   return mapCategoryRow(data as CategoryQueryRow);
@@ -318,16 +318,14 @@ export async function deleteCategory(id: string): Promise<void> {
     .maybeSingle();
 
   if (error?.code === "23503") {
-    throw new AppError(
-      "CONFLICT",
-      409,
+    throw conflict(
       "This category cannot be deleted because it is used by products.",
     );
   }
 
   throwIfCatalogError(error);
   if (!data) {
-    throw new AppError("NOT_FOUND", 404, "Category not found.");
+    throw notFound("Category not found.");
   }
 }
 
@@ -345,7 +343,7 @@ export async function setCategoryActive(
 
   throwIfCatalogError(error);
   if (!data) {
-    throw new AppError("NOT_FOUND", 404, "Category not found.");
+    throw notFound("Category not found.");
   }
 
   return mapCategoryRow(data as CategoryQueryRow);
@@ -472,7 +470,7 @@ export async function updateProduct(
 
   throwIfCatalogWriteError(error, "slug");
   if (!data) {
-    throw new AppError("NOT_FOUND", 404, "Product not found.");
+    throw notFound("Product not found.");
   }
 
   return mapProductRow(data as ProductQueryRow);
@@ -489,7 +487,7 @@ export async function deleteProduct(id: string): Promise<void> {
 
   throwIfCatalogError(error);
   if (!data) {
-    throw new AppError("NOT_FOUND", 404, "Product not found.");
+    throw notFound("Product not found.");
   }
 }
 
@@ -507,7 +505,7 @@ export async function setProductActive(
 
   throwIfCatalogError(error);
   if (!data) {
-    throw new AppError("NOT_FOUND", 404, "Product not found.");
+    throw notFound("Product not found.");
   }
 
   return mapProductRow(data as ProductQueryRow);
@@ -593,8 +591,8 @@ function throwIfCatalogWriteError(
   uniqueField: string,
 ): void {
   if (error?.code === "23505") {
-    throw new AppError("CONFLICT", 409, "The submitted data is invalid.", {
-      fieldErrors: { [uniqueField]: ["This value is already used."] },
+    throw conflict("This value is already used.", {
+      [uniqueField]: ["This value is already used."],
     });
   }
 
@@ -607,9 +605,5 @@ function throwIfCatalogError(error: { code?: string } | null): void {
   }
 
   logger.warn({ code: error.code }, "Catalog query failed");
-  throw new AppError(
-    "DATABASE_ERROR",
-    500,
-    "The service is temporarily unavailable.",
-  );
+  throw serviceUnavailable();
 }

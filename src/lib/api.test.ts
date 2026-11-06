@@ -18,9 +18,9 @@ describe("parseApiResponse", () => {
       JSON.stringify({
         success: false,
         error: {
-          code: "VALIDATION",
-          message: "Check the form.",
-          details: { fieldErrors: { email: ["Required"] } },
+          code: "VALIDATION_ERROR",
+          message: "Validation failed",
+          fieldErrors: { email: ["Required"] },
         },
       }),
       { status: 422, headers: { "content-type": "application/json" } },
@@ -28,8 +28,8 @@ describe("parseApiResponse", () => {
 
     await expect(parseApiResponse(response)).rejects.toMatchObject({
       name: "ApiError",
-      message: "Check the form.",
-      code: "VALIDATION",
+      message: "Validation failed",
+      code: "VALIDATION_ERROR",
       fieldErrors: { email: ["Required"] },
     });
   });

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { z } from "zod";
-import { AppError } from "@/server/http/api";
+import { serviceUnavailable } from "@/server/http/api";
 import { logger } from "@/server/logging/logger";
 
 const envSchema = z.object({
@@ -40,22 +40,14 @@ export function getEnv(): Env {
       "Invalid environment configuration",
     );
 
-    throw new AppError(
-      "CONFIGURATION_ERROR",
-      500,
-      "The service is temporarily unavailable.",
-    );
+    throw serviceUnavailable("CONFIGURATION_ERROR");
   }
 
   try {
     new URL(parsed.data.NEXT_PUBLIC_APP_URL);
     new URL(parsed.data.SUPABASE_URL);
   } catch {
-    throw new AppError(
-      "CONFIGURATION_ERROR",
-      500,
-      "The service is temporarily unavailable.",
-    );
+    throw serviceUnavailable("CONFIGURATION_ERROR");
   }
 
   cached = parsed.data;

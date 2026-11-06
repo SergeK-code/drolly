@@ -1,4 +1,4 @@
-import { AppError } from "@/server/http/api";
+import { rateLimited } from "@/server/http/api";
 
 /**
  * In-memory rate limiter for local development and a single Node process.
@@ -60,11 +60,6 @@ export function assertWithinRateLimit(
   const result = limiter.consume(key);
 
   if (!result.allowed) {
-    throw new AppError(
-      "RATE_LIMITED",
-      429,
-      "Too many requests. Please try again later.",
-      { retryAfterSeconds: result.retryAfterSeconds },
-    );
+    throw rateLimited();
   }
 }
