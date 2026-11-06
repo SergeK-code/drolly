@@ -1,24 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f4f1;
+  --background: #f7f5f2;
   --foreground: #1c1917;
-  --surface: #ffffff;
+  --surface: #fffcf8;
   --muted: #57534e;
-  --border: #e7e5e4;
+  --muted-bg: #efece7;
+  --border: #e7e2da;
   --accent: #0f766e;
-  --accent-hover: #0d9488;
-  --accent-foreground: #ffffff;
+  --accent-hover: #0d5f59;
+  --accent-foreground: #f8faf9;
+  --accent-subtle: #e7f4f2;
   --danger: #b42318;
+  --danger-bg: #fef3f2;
   --success: #067647;
-  --radius-sm: 0.625rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --shadow-sm: 0 1px 2px rgb(28 25 23 / 0.05);
-  --shadow-md: 0 10px 30px rgb(28 25 23 / 0.08);
-  --space-page: 1rem;
-  --duration-fast: 180ms;
-  --duration-med: 240ms;
+  --success-bg: #ecfdf3;
+  --warning: #b54708;
+  --warning-bg: #fffaeb;
+  --info: #175cd3;
+  --info-bg: #eff8ff;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --shadow-sm: 0 1px 2px rgb(28 25 23 / 0.06);
+  --shadow-md: 0 6px 16px rgb(28 25 23 / 0.08);
+  --shadow-lg: 0 12px 28px rgb(28 25 23 / 0.1);
+  --duration-fast: 160ms;
+  --duration-med: 220ms;
+  --z-header: 40;
+  --z-overlay: 50;
+  --z-modal: 70;
+  --z-toast: 80;
 }
 
 @theme inline {
@@ -26,17 +38,26 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-muted: var(--muted);
+  --color-muted-bg: var(--muted-bg);
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-subtle: var(--accent-subtle);
   --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
   --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -59,15 +80,23 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: 0.9375rem;
   line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.03em;
+  line-height: 1.2;
 }
 
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -75,12 +104,28 @@ body {
   }
 }
 
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
 .page-enter {
   animation: page-enter var(--duration-med) ease-out;
 }
 
+.skeleton {
+  animation: pulse-soft 1.4s ease-in-out infinite;
+  background: var(--muted-bg);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .page-enter {
+  .page-enter,
+  .skeleton {
     animation: none;
   }
 }

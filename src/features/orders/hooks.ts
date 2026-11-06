@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import {
+  cancelOwnOrder,
   createAddress,
   fetchAddresses,
   fetchAdminOrder,
@@ -76,6 +77,16 @@ export function useCreateAddressMutation() {
       await queryClient.invalidateQueries({
         queryKey: ordersQueryKey.addresses(),
       });
+    },
+  });
+}
+
+export function useCancelOrderMutation(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => cancelOwnOrder(id),
+    onSuccess: async () => {
+      await invalidateOrderQueries(queryClient);
     },
   });
 }

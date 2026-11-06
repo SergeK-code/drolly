@@ -14,9 +14,12 @@ import {
 import { AddToCartButton } from "@/features/cart/add-to-cart-button";
 import type { PublicProduct } from "@/features/catalog/api";
 import { catalogImageUrl } from "@/lib/catalog-media";
+import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { Card } from "@/ui/card";
+import { EmptyState } from "@/ui/empty-state";
 import { ErrorRetry } from "@/ui/error-retry";
+import { CatalogSkeleton, Skeleton } from "@/ui/skeleton";
 import { Dropdown } from "@/ui/dropdown";
 import { Input } from "@/ui/input";
 import { Field } from "@/ui/field";
@@ -106,7 +109,7 @@ export function CatalogBrowser() {
 
   return (
     <section className="flex flex-col gap-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="sticky top-0 z-20 -mx-4 flex flex-col gap-4 bg-background/95 px-4 py-3 sm:-mx-6 sm:flex-row sm:items-end sm:justify-between sm:px-6">
         <Field id="catalog-search" label="Search products" error={searchError}>
           <Input
             id="catalog-search"
@@ -133,14 +136,16 @@ export function CatalogBrowser() {
         </Field>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6">
         <CategoryChip
           label="All"
           href={catalogHref({ ...hrefFilters, category: undefined })}
           selected={!filters.category}
         />
         {categoriesQuery.isPending
-          ? null
+          ? [0, 1, 2].map((key) => (
+              <Skeleton key={key} className="h-11 w-24 shrink-0 rounded-full" />
+            ))
           : categoriesQuery.data?.items.map((category) => (
               <CategoryChip
                 key={category.id}
@@ -158,16 +163,7 @@ export function CatalogBrowser() {
         />
       ) : null}
 
-      {productsQuery.isPending ? (
-        <ul
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          aria-busy="true"
-        >
-          <li className="h-64 rounded-lg bg-border/70" />
-          <li className="h-64 rounded-lg bg-border/70" />
-          <li className="hidden h-64 rounded-lg bg-border/70 lg:block" />
-        </ul>
-      ) : null}
+      {productsQuery.isPending ? <CatalogSkeleton /> : null}
 
       {productsQuery.isError ? (
         <ErrorRetry
@@ -177,11 +173,14 @@ export function CatalogBrowser() {
       ) : null}
 
       {productsQuery.isSuccess && products.length === 0 ? (
-        <p className="text-sm text-muted">
-          {filters.q || filters.category
-            ? "No products match your search."
-            : "No products are available yet."}
-        </p>
+        <EmptyState
+          title={
+            filters.q || filters.category
+              ? "No products match your search."
+              : "No products are available yet."
+          }
+          description="Try another category or clear the search to see the full catalog."
+        />
       ) : null}
 
       {products.length > 0 ? (
@@ -223,11 +222,11 @@ function CategoryChip({
       scroll={false}
       aria-current={selected ? "page" : undefined}
       className={cx(
-        "inline-flex min-h-9 items-center rounded-full px-3 text-xs font-medium",
+        "inline-flex min-h-11 shrink-0 items-center rounded-full px-3.5 text-sm font-medium transition-colors",
         "focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent",
         selected
           ? "bg-accent text-accent-foreground shadow-sm"
-          : "bg-surface text-foreground shadow-sm ring-1 ring-border hover:bg-background",
+          : "bg-surface text-foreground ring-1 ring-border hover:bg-muted-bg",
       )}
     >
       {label}
@@ -247,7 +246,7 @@ function ProductCard({
       <article className="flex h-full flex-col">
         <Link
           href={`/products/${product.slug}`}
-          className="flex flex-1 flex-col focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="group flex flex-1 flex-col focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <MediaImage
             src={catalogImageUrl(product.slug, product.imagePath)}
@@ -255,13 +254,17 @@ function ProductCard({
             className="aspect-4/3 w-full"
           />
           <div className="flex flex-1 flex-col gap-1 p-4">
-            <h2 className="text-base font-semibold leading-snug">
+            <h2 className="text-base font-semibold leading-snug tracking-tight">
               {product.name}
             </h2>
             <p className="text-sm text-muted">{product.categoryName}</p>
-            <p className="mt-auto pt-2 text-sm font-medium">{price}</p>
+            <p className="mt-auto pt-3 text-base font-semibold tracking-tight">
+              {price}
+            </p>
             {product.stockQuantity <= 0 ? (
-              <p className="text-xs text-muted">Out of stock</p>
+              <Badge tone="neutral" className="mt-1 w-fit">
+                Out of stock
+              </Badge>
             ) : null}
           </div>
         </Link>

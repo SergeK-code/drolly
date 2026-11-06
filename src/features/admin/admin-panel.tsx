@@ -13,7 +13,7 @@ export function AdminPanel({
   children: ReactNode;
 }) {
   return (
-    <section className="flex h-full min-h-0 flex-col gap-4">
+    <section className="flex min-h-0 flex-1 flex-col gap-4">
       <header className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
@@ -23,7 +23,9 @@ export function AdminPanel({
         </div>
         {action}
       </header>
-      {children}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        {children}
+      </div>
     </section>
   );
 }

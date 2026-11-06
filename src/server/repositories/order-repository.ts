@@ -160,27 +160,38 @@ export async function updateOrderStatusRow(input: {
   toStatus: OrderStatusCode;
 }): Promise<PublicOrder> {
   const supabase = await createSupabaseServerClient();
-  const fromId = await statusIdForCode(input.fromStatus);
-  const toId = await statusIdForCode(input.toStatus);
-
-  const { data, error } = await supabase
-    .from("orders")
-    .update({ status_id: toId })
-    .eq("id", input.orderId)
-    .eq("status_id", fromId)
-    .select(ORDER_DETAIL_SELECT)
-    .maybeSingle();
+  const { data, error } = await supabase.rpc("update_order_status", {
+    p_order_id: input.orderId,
+    p_from_status: input.fromStatus,
+    p_to_status: input.toStatus,
+  });
 
   if (error) {
-    logger.warn({ code: error.code }, "Order status update failed");
+    throw mapOrderStatusError(error);
+  }
+
+  if (typeof data !== "string" || data.length === 0) {
     throw serviceUnavailable();
   }
 
-  if (!data) {
-    throw conflict("The order status could not be updated.");
+  return getOrderById(data, { includeCustomer: true });
+}
+
+export async function cancelOwnOrderRow(orderId: string): Promise<PublicOrder> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc("cancel_own_order", {
+    p_order_id: orderId,
+  });
+
+  if (error) {
+    throw mapCancelOwnOrderError(error);
   }
 
-  return toPublicOrder(data as OrderRow, { includeCustomer: true });
+  if (typeof data !== "string" || data.length === 0) {
+    throw serviceUnavailable();
+  }
+
+  return getOrderById(data);
 }
 
 const statusIdForCode = cache(async function statusIdForCode(
@@ -199,6 +210,47 @@ const statusIdForCode = cache(async function statusIdForCode(
 
   return data.id;
 });
+
+function mapCancelOwnOrderError(error: {
+  message?: string;
+  code?: string;
+}): never {
+  const code = error.message?.match(/ORDER_STATUS_[A-Z]+/)?.[0];
+
+  switch (code) {
+    case "ORDER_STATUS_UNAUTHENTICATED":
+      throw unauthenticated();
+    case "ORDER_STATUS_NOT_FOUND":
+      throw notFound("This order was not found.");
+    case "ORDER_STATUS_CONFLICT":
+      throw conflict("This order can no longer be cancelled.");
+    default:
+      logger.warn({ code: error.code }, "Cancel own order function failed");
+      throw serviceUnavailable();
+  }
+}
+
+function mapOrderStatusError(error: { message?: string; code?: string }): never {
+  const code = error.message?.match(/ORDER_STATUS_[A-Z]+/)?.[0];
+
+  switch (code) {
+    case "ORDER_STATUS_UNAUTHENTICATED":
+      throw unauthenticated();
+    case "ORDER_STATUS_FORBIDDEN":
+      throw forbidden();
+    case "ORDER_STATUS_NOT_FOUND":
+      throw notFound("This order was not found.");
+    case "ORDER_STATUS_VALIDATION":
+      throw validationFailed({ status: ["Choose a valid order status."] });
+    case "ORDER_STATUS_STOCK":
+      throw conflict("There is not enough stock to reopen this order.");
+    case "ORDER_STATUS_CONFLICT":
+      throw conflict("The order status could not be updated.");
+    default:
+      logger.warn({ code: error.code }, "Order status function failed");
+      throw serviceUnavailable();
+  }
+}
 
 function mapCheckoutError(error: { message?: string; code?: string }): never {
   const code = error.message?.match(/CHECKOUT_[A-Z]+/)?.[0];
@@ -223,10 +275,6 @@ function mapCheckoutError(error: { message?: string; code?: string }): never {
       throw conflict("A product in the cart is no longer available.");
     case "CHECKOUT_STOCK":
       throw conflict("There is not enough stock for this order.");
-    case "CHECKOUT_MINIMUM":
-      throw validationFailed({
-        items: ["The order is below the store minimum."],
-      });
     case "CHECKOUT_CURRENCY":
       throw conflict("The cart mixes currencies that cannot be checked out.");
     default:

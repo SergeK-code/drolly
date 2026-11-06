@@ -11,6 +11,7 @@ import {
   useSetProductActiveMutation,
 } from "@/features/admin-catalog/hooks";
 import { AdminPanel, AdminTableCard } from "@/features/admin/admin-panel";
+import { Badge } from "@/ui/badge";
 import { catalogImageUrl } from "@/lib/catalog-media";
 import { Button } from "@/ui/button";
 import { ConfirmModal } from "@/ui/confirm-modal";
@@ -103,7 +104,7 @@ export function ProductTable() {
       {query.data && query.data.items.length > 0 ? (
         <AdminTableCard>
           <table className="w-full min-w-[52rem] border-collapse text-left text-sm">
-            <thead className="sticky top-0 z-10 bg-background">
+            <thead className="sticky top-0 z-10 bg-surface">
               <tr className="border-b border-border">
                 <th className="px-4 py-3 font-medium">Product</th>
                 <th className="px-4 py-3 font-medium">Category</th>
@@ -124,6 +125,7 @@ export function ProductTable() {
                       <MediaImage
                         src={catalogImageUrl(product.slug, product.imagePath)}
                         alt=""
+                        zoom={false}
                         className="h-10 w-10 shrink-0 rounded-md"
                       />
                       <span className="font-medium">{product.name}</span>
@@ -135,7 +137,9 @@ export function ProductTable() {
                   </td>
                   <td className="px-4 py-3">{product.stockQuantity}</td>
                   <td className="px-4 py-3">
-                    {product.isActive ? "Active" : "Inactive"}
+                    <Badge tone={product.isActive ? "success" : "neutral"}>
+                      {product.isActive ? "Active" : "Inactive"}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap justify-end gap-2">

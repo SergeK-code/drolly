@@ -11,6 +11,21 @@ export const ORDER_STATUS_CODES = [
 
 export type OrderStatusCode = (typeof ORDER_STATUS_CODES)[number];
 
+/** Display names seeded on public.order_statuses. */
+export const ORDER_STATUS_NAMES: Record<OrderStatusCode, string> = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  preparing: "Preparing",
+  out_for_delivery: "Out for delivery",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
+
+export const ORDER_STATUSES = ORDER_STATUS_CODES.map((code) => ({
+  code,
+  name: ORDER_STATUS_NAMES[code],
+}));
+
 export const orderStatusCodeSchema = z.enum(ORDER_STATUS_CODES, {
   error: "Choose a valid order status.",
 });
@@ -21,21 +36,22 @@ export const adminOrderStatusBodySchema = z
   })
   .strict();
 
-export const ORDER_STATUS_TRANSITIONS: Record<
-  OrderStatusCode,
-  readonly OrderStatusCode[]
-> = {
-  pending: ["confirmed", "cancelled"],
-  confirmed: ["preparing", "cancelled"],
-  preparing: ["out_for_delivery"],
-  out_for_delivery: ["delivered"],
-  delivered: [],
-  cancelled: [],
-};
+export function orderStatusName(code: OrderStatusCode): string {
+  return ORDER_STATUS_NAMES[code];
+}
 
 export function canTransitionOrderStatus(
   from: OrderStatusCode,
   to: OrderStatusCode,
 ): boolean {
-  return ORDER_STATUS_TRANSITIONS[from].includes(to);
+  return from !== to;
+}
+
+const CUSTOMER_CANCELABLE_STATUSES: readonly OrderStatusCode[] = [
+  "pending",
+  "confirmed",
+];
+
+export function canCustomerCancelOrder(status: OrderStatusCode): boolean {
+  return CUSTOMER_CANCELABLE_STATUSES.includes(status);
 }

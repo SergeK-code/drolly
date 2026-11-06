@@ -128,6 +128,7 @@ export function CategoryForm({
           <MediaImage
             src={catalogImageUrl(category?.slug ?? "new-category", imagePath)}
             alt=""
+            zoom={false}
             className="h-24 w-24"
           />
         </div>

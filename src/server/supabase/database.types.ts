@@ -452,6 +452,20 @@ export type Database = {
         };
         Returns: string;
       };
+      update_order_status: {
+        Args: {
+          p_order_id: string;
+          p_from_status: string;
+          p_to_status: string;
+        };
+        Returns: string;
+      };
+      cancel_own_order: {
+        Args: {
+          p_order_id: string;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       [_ in never]: never;

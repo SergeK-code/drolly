@@ -25,3 +25,20 @@ describe("checkout migration", () => {
     expect(sql).not.toContain("disable row level security");
   });
 });
+
+describe("checkout skip-minimum migration", () => {
+  it("replaces place_cod_order without enforcing the stored minimum", () => {
+    const sql = readFileSync(
+      path.resolve(
+        process.cwd(),
+        "supabase/migrations/20261106161600_checkout_skip_minimum.sql",
+      ),
+      "utf8",
+    );
+
+    expect(sql).toContain("create or replace function public.place_cod_order");
+    expect(sql).not.toContain("CHECKOUT_MINIMUM");
+    expect(sql).not.toContain("v_subtotal < v_minimum");
+    expect(sql).toContain("minimum_order_minor");
+  });
+});

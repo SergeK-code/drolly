@@ -1,14 +1,12 @@
 import { CartView } from "@/features/cart/cart-view";
 import { PageShell } from "@/ui/page-shell";
-import { TextLink } from "@/ui/text-link";
+import { BackLink } from "@/ui/text-link";
 
 export default function CartPage() {
   return (
     <PageShell>
-      <TextLink href="/" className="text-sm">
-        Back to catalog
-      </TextLink>
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Cart</h1>
+      <BackLink href="/">Back to catalog</BackLink>
+      <h1 className="text-3xl font-semibold tracking-tight">Cart</h1>
       <CartView />
     </PageShell>
   );

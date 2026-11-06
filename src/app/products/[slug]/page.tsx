@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { ProductDetail } from "@/features/catalog/product-detail";
 import { PageShell } from "@/ui/page-shell";
-import { TextLink } from "@/ui/text-link";
+import { BackLink } from "@/ui/text-link";
 
 export default function ProductPage({
   params,
@@ -10,10 +10,14 @@ export default function ProductPage({
 }) {
   return (
     <PageShell>
-      <TextLink href="/" className="text-sm">
-        Back to catalog
-      </TextLink>
-      <Suspense fallback={<p className="text-base text-muted">Loading product…</p>}>
+      <BackLink href="/">Back to catalog</BackLink>
+      <Suspense
+        fallback={
+          <p className="text-sm text-muted" aria-busy="true">
+            Loading product…
+          </p>
+        }
+      >
         <ProductFromParams params={params} />
       </Suspense>
     </PageShell>

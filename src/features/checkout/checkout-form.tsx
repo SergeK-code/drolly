@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
-import { useSession } from "@/features/auth/hooks";
+import { useAuth } from "@/features/auth/hooks";
 import { useCart } from "@/features/cart/cart-store";
 import { fetchProduct } from "@/features/catalog/api";
 import { catalogQueryKey } from "@/features/catalog/query-keys";
@@ -31,6 +31,7 @@ import { Button } from "@/ui/button";
 import { Card } from "@/ui/card";
 import { Field } from "@/ui/field";
 import { Input, Select, Textarea } from "@/ui/input";
+import { EmptyState } from "@/ui/empty-state";
 import { QueryState } from "@/ui/error-retry";
 import { TextLink } from "@/ui/text-link";
 import { useToast } from "@/ui/toast";
@@ -77,7 +78,7 @@ function bannerFromFieldErrors(fieldErrors: FieldErrors): string | null {
 
 export function CheckoutForm() {
   const router = useRouter();
-  const session = useSession();
+  const { user, status } = useAuth();
   const items = useCart((state) => state.items);
   const clearCart = useCart((state) => state.clear);
   const addressesQuery = useAddressesQuery();
@@ -119,36 +120,41 @@ export function CheckoutForm() {
     [items, productQueries],
   );
 
-  const user = session.data?.user ?? null;
   const addresses = addressesQuery.data?.addresses ?? [];
   const usingSaved = addressId.length > 0;
 
-  if (session.isPending) {
-    return <p className="text-sm text-muted">Checking session…</p>;
+  if (status === "loading") {
+    return <p className="text-sm text-muted">Checking account…</p>;
   }
 
   if (!user) {
     return (
-      <p className="text-sm text-muted">
-        <TextLink href={signInHref("/checkout")}>Sign in</TextLink> to place an
-        order.
-      </p>
+      <EmptyState
+        title="Sign in to check out"
+        description="Totals and stock are confirmed on the server. Payment is cash on delivery."
+        action={
+          <TextLink href={signInHref("/checkout")}>Sign in</TextLink>
+        }
+      />
     );
   }
 
   if (user.role !== "customer") {
     return (
-      <p className="text-sm text-muted">
-        Checkout is available on customer accounts.
-      </p>
+      <EmptyState
+        title="Customer accounts only"
+        description="Checkout is available on customer accounts."
+      />
     );
   }
 
   if (items.length === 0) {
     return (
-      <p className="text-sm text-muted">
-        Your cart is empty. <TextLink href="/">Browse products</TextLink>
-      </p>
+      <EmptyState
+        title="Your cart is empty"
+        description="Add products from the catalog, then return here to place the order."
+        action={<TextLink href="/">Browse products</TextLink>}
+      />
     );
   }
 
@@ -245,10 +251,10 @@ export function CheckoutForm() {
   return (
     <form
       onSubmit={(event) => void onSubmit(event)}
-      className="flex flex-col gap-6"
+      className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start"
       noValidate
     >
-      <Card>
+      <Card className="lg:col-start-2">
         <h2 className="mb-3 text-lg font-semibold">Items</h2>
         <ul className="flex flex-col gap-2 text-sm">
           {lines.map((line) => (
@@ -266,13 +272,13 @@ export function CheckoutForm() {
           Prices, stock and delivery fee are calculated on the server from current
           store settings
           {settings
-            ? ` (${formatMoney(settings.deliveryFeeMinor, settings.currency)} delivery, ${formatMoney(settings.minimumOrderMinor, settings.currency)} minimum)`
+            ? ` (${formatMoney(settings.deliveryFeeMinor, settings.currency)} delivery)`
             : ""}
           . Payment is cash on delivery.
         </p>
       </Card>
 
-      <Card>
+      <Card className="lg:col-start-1 lg:row-start-1">
         <h2 className="mb-3 text-lg font-semibold">Delivery address</h2>
         <QueryState
           isPending={addressesQuery.isPending}
@@ -380,18 +386,21 @@ export function CheckoutForm() {
         )}
       </Card>
 
-      {formError ? (
-        <p className="text-sm text-danger" role="alert">
-          {formError}
-        </p>
-      ) : null}
+      <div className="flex flex-col gap-4 lg:col-start-2">
+        {formError ? (
+          <p className="text-sm text-danger" role="alert">
+            {formError}
+          </p>
+        ) : null}
 
-      <Button
-        type="submit"
-        disabled={checkout.isPending || saveAddress.isPending}
-      >
-        {checkout.isPending ? "Placing order…" : "Place cash-on-delivery order"}
-      </Button>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={checkout.isPending || saveAddress.isPending}
+        >
+          {checkout.isPending ? "Placing order…" : "Place cash-on-delivery order"}
+        </Button>
+      </div>
     </form>
   );
 }

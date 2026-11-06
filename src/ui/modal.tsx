@@ -64,14 +64,14 @@ export function Modal({
           <button
             type="button"
             aria-label="Close dialog"
-            className="absolute inset-0 bg-foreground/40"
+            className="absolute inset-0 bg-foreground/30 backdrop-blur-[2px]"
             onClick={onClose}
           />
           <motion.div
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"
-            className="relative z-10 max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-lg bg-surface p-5 shadow-md"
+            className="relative z-10 max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-lg bg-surface p-6 shadow-lg ring-1 ring-border"
             {...fadeSlide}
             transition={motionTransition(reduce)}
           >

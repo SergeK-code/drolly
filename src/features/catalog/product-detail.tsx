@@ -5,7 +5,9 @@ import { AddToCartButton } from "@/features/cart/add-to-cart-button";
 import { useProductQuery } from "@/features/catalog/hooks";
 import type { PublicProduct } from "@/features/catalog/api";
 import { catalogImageUrl } from "@/lib/catalog-media";
+import { Badge } from "@/ui/badge";
 import { Card } from "@/ui/card";
+import { EmptyState } from "@/ui/empty-state";
 import { QueryState } from "@/ui/error-retry";
 import { MediaImage } from "@/ui/media-image";
 
@@ -18,7 +20,10 @@ export function ProductDetail({ slug }: { slug: string }) {
 
   if (notFound) {
     return (
-      <p className="text-base text-muted">This product is not available.</p>
+      <EmptyState
+        title="This product is not available"
+        description="It may be inactive or the link is out of date."
+      />
     );
   }
 
@@ -40,31 +45,34 @@ function ProductDetailBody({ product }: { product: PublicProduct }) {
     style: "currency",
     currency: product.currency,
   }).format(product.priceMinor / 100);
+  const inStock = product.stockQuantity > 0;
 
   return (
     <Card className="overflow-hidden p-0">
-      <MediaImage
-        src={catalogImageUrl(product.slug, product.imagePath)}
-        alt={product.name}
-        className="aspect-video w-full"
-      />
-      <div className="flex flex-col gap-3 p-5 sm:p-6">
-        <p className="text-sm text-muted">{product.categoryName}</p>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {product.name}
-        </h1>
-        <p className="text-lg font-medium">{price}</p>
-        {product.description ? (
-          <p className="text-sm leading-6 text-muted sm:text-base sm:leading-7">
-            {product.description}
-          </p>
-        ) : null}
-        <p className="text-sm text-muted">
-          {product.stockQuantity > 0
-            ? `${product.stockQuantity} in stock`
-            : "Out of stock"}
-        </p>
-        <AddToCartButton product={product} className="w-fit" />
+      <div className="grid md:grid-cols-2">
+        <MediaImage
+          src={catalogImageUrl(product.slug, product.imagePath)}
+          alt={product.name}
+          className="aspect-square w-full md:min-h-96"
+        />
+        <div className="flex flex-col gap-4 p-6 sm:p-8">
+          <p className="text-sm font-medium text-muted">{product.categoryName}</p>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            {product.name}
+          </h1>
+          <p className="text-2xl font-semibold tracking-tight">{price}</p>
+          {product.description ? (
+            <p className="text-sm leading-6 text-muted sm:text-base sm:leading-7">
+              {product.description}
+            </p>
+          ) : null}
+          <Badge tone={inStock ? "success" : "neutral"} className="w-fit">
+            {inStock ? `${product.stockQuantity} in stock` : "Out of stock"}
+          </Badge>
+          <div className="mt-auto pt-4">
+            <AddToCartButton product={product} className="w-full sm:w-fit" />
+          </div>
+        </div>
       </div>
     </Card>
   );

@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { CartView } from "@/features/cart/cart-view";
 import { useCart } from "@/features/cart/cart-store";
-import { Button } from "@/ui/button";
+import { Button, ButtonLink } from "@/ui/button";
 import { Modal } from "@/ui/modal";
 
 export function CartDrawer() {
@@ -17,13 +16,9 @@ export function CartDrawer() {
         <Button variant="secondary" onClick={closeDrawer}>
           Keep shopping
         </Button>
-        <Link
-          href="/cart"
-          onClick={closeDrawer}
-          className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground shadow-sm hover:bg-accent-hover focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-accent"
-        >
+        <ButtonLink href="/cart" onClick={closeDrawer}>
           View cart
-        </Link>
+        </ButtonLink>
       </div>
     </Modal>
   );

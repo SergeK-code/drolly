@@ -1,4 +1,1 @@
-export {
-  canTransitionOrderStatus,
-  ORDER_STATUS_TRANSITIONS,
-} from "@/lib/order-status";
+export { canTransitionOrderStatus } from "@/lib/order-status";

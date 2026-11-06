@@ -204,6 +204,7 @@ export function ProductForm({
                 imagePath,
               )}
               alt="Product"
+              zoom={false}
               className="h-32 w-32"
             />
           </div>

@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Button } from "@/ui/button";
+import { Skeleton } from "@/ui/skeleton";
 
 export function ErrorRetry({
   message,
@@ -11,8 +12,8 @@ export function ErrorRetry({
   onRetry: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <p className="text-base text-danger">{message}</p>
+    <div className="flex flex-col items-start gap-3 rounded-lg bg-danger-bg px-4 py-4 ring-1 ring-danger/20">
+      <p className="text-sm text-danger">{message}</p>
       <Button variant="secondary" onClick={onRetry} className="w-fit">
         Retry
       </Button>
@@ -36,7 +37,13 @@ export function QueryState({
   children: ReactNode;
 }) {
   if (isPending) {
-    return <p className="text-sm text-muted">{pendingMessage}</p>;
+    return (
+      <div aria-busy="true" className="flex flex-col gap-3">
+        <p className="sr-only">{pendingMessage}</p>
+        <Skeleton className="h-24 w-full rounded-lg" />
+        <Skeleton className="h-10 w-48 rounded-md" />
+      </div>
+    );
   }
 
   if (isError) {

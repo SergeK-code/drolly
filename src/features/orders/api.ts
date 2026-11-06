@@ -1,3 +1,4 @@
+import { adminCatalogQueryKey } from "@/features/admin-catalog/query-keys";
 import { catalogQueryKey } from "@/features/catalog/query-keys";
 import { parseApiResponse } from "@/lib/api";
 import type { OrderStatusCode } from "@/lib/order-status";
@@ -151,6 +152,17 @@ export async function fetchAdminOrder(
   return parseApiResponse(response);
 }
 
+export async function cancelOwnOrder(
+  id: string,
+): Promise<{ order: PublicOrder }> {
+  const response = await fetch(`/api/orders/${id}/cancel`, {
+    method: "POST",
+    credentials: "include",
+    cache: "no-store",
+  });
+  return parseApiResponse(response);
+}
+
 export async function updateAdminOrderStatus(
   id: string,
   status: OrderStatusCode,
@@ -168,5 +180,6 @@ export async function invalidateOrderQueries(
   await Promise.all([
     queryClient.invalidateQueries({ queryKey: ordersQueryKey.all }),
     queryClient.invalidateQueries({ queryKey: catalogQueryKey.all }),
+    queryClient.invalidateQueries({ queryKey: adminCatalogQueryKey.all }),
   ]);
 }

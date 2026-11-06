@@ -27,9 +27,10 @@ export default async function SignInPage({
   return (
     <PageShell className="items-center">
       <Card className="mx-auto w-full max-w-md">
-        <h1 className="mb-4 text-2xl font-semibold tracking-tight sm:text-3xl">
-          Sign in
-        </h1>
+        <h1 className="mb-1 text-2xl font-semibold tracking-tight">Sign in</h1>
+        <p className="mb-6 text-sm text-muted">
+          Use your account email and password.
+        </p>
         <AuthForm
           key={notice ?? "sign-in"}
           mode="sign-in"

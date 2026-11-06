@@ -4,12 +4,15 @@ import type { PublicUser } from "@/server/auth/public-user";
 import {
   requireAdmin,
   requireAuthenticatedUser,
+  requireCustomer,
 } from "@/server/auth/protect";
 import { conflict } from "@/server/http/api";
+import { canCustomerCancelOrder } from "@/lib/order-status";
 import type { PublicOrder } from "@/server/orders/public";
 import type { OrderListQuery, OrderStatusCode } from "@/server/orders/schemas";
 import { canTransitionOrderStatus } from "@/server/orders/transitions";
 import {
+  cancelOwnOrderRow,
   getOrderById,
   listOrders,
   updateOrderStatusRow,
@@ -29,6 +32,20 @@ export async function getCustomerOrder(
 ): Promise<PublicOrder> {
   requireAuthenticatedUser(user);
   return getOrderById(orderId);
+}
+
+export async function cancelCustomerOrder(
+  user: PublicUser | null,
+  orderId: string,
+): Promise<PublicOrder> {
+  requireCustomer(user);
+  const current = await getOrderById(orderId);
+
+  if (!canCustomerCancelOrder(current.status)) {
+    throw conflict("This order can no longer be cancelled.");
+  }
+
+  return cancelOwnOrderRow(orderId);
 }
 
 export async function listAdminOrders(
@@ -55,12 +72,8 @@ export async function updateAdminOrderStatus(
   requireAdmin(user);
   const current = await getOrderById(orderId, { includeCustomer: true });
 
-  if (current.status === status) {
-    return current;
-  }
-
   if (!canTransitionOrderStatus(current.status, status)) {
-    throw conflict("That status change is not allowed.");
+    return current;
   }
 
   return updateOrderStatusRow({

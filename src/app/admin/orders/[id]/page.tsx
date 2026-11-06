@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { AdminOrderDetail } from "@/features/admin-orders/order-detail";
-import { TextLink } from "@/ui/text-link";
+import { BackLink } from "@/ui/text-link";
 
 export const instant = false;
 
@@ -10,10 +10,8 @@ export default function AdminOrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
-      <TextLink href="/admin/orders" className="text-sm">
-        Back to orders
-      </TextLink>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <BackLink href="/admin/orders">Back to orders</BackLink>
       <Suspense fallback={<p className="text-sm text-muted">Loading order…</p>}>
         <AdminOrderFromParams params={params} />
       </Suspense>

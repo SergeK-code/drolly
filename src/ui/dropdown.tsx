@@ -246,7 +246,7 @@ export function Dropdown<T extends string>({
                     className={cx(
                       "cursor-pointer px-3 py-2 text-sm",
                       option.disabled && "cursor-not-allowed text-muted opacity-60",
-                      isActive && !option.disabled && "bg-background",
+                      isActive && !option.disabled && "bg-accent-subtle",
                       isSelected && "font-medium text-accent",
                     )}
                     onMouseEnter={() => setHighlight(index)}

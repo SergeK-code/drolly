@@ -20,9 +20,12 @@ export default async function SignUpPage({
   return (
     <PageShell className="items-center">
       <Card className="mx-auto w-full max-w-md">
-        <h1 className="mb-4 text-2xl font-semibold tracking-tight sm:text-3xl">
+        <h1 className="mb-1 text-2xl font-semibold tracking-tight">
           Create account
         </h1>
+        <p className="mb-6 text-sm text-muted">
+          Customer accounts can check out with cash on delivery.
+        </p>
         <AuthForm mode="sign-up" returnTo={returnTo} />
         <p className="mt-4 text-sm text-muted">
           Already registered? <TextLink href={signInLink}>Sign in</TextLink>

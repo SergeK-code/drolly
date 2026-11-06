@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useAdminOrdersQuery } from "@/features/orders/hooks";
 import { formatMoney } from "@/features/orders/money";
-import { ORDER_STATUS_CODES } from "@/lib/order-status";
+import { OrderStatusBadge } from "@/features/orders/order-summary";
+import { ORDER_STATUSES } from "@/lib/order-status";
 import { AdminPanel, AdminTableCard } from "@/features/admin/admin-panel";
 import { QueryState } from "@/ui/error-retry";
 import { Select } from "@/ui/input";
@@ -16,7 +17,7 @@ export function AdminOrderTable() {
   return (
     <AdminPanel
       title="Orders"
-      description="Review cash-on-delivery orders and move them along the allowed statuses."
+      description="Review cash-on-delivery orders and update their status."
       action={
         <Select
           aria-label="Filter by status"
@@ -25,9 +26,9 @@ export function AdminOrderTable() {
           className="w-48"
         >
           <option value="">All statuses</option>
-          {ORDER_STATUS_CODES.map((code) => (
-            <option key={code} value={code}>
-              {code.replaceAll("_", " ")}
+          {ORDER_STATUSES.map((status) => (
+            <option key={status.code} value={status.code}>
+              {status.name}
             </option>
           ))}
         </Select>
@@ -42,7 +43,7 @@ export function AdminOrderTable() {
       >
         <AdminTableCard>
           <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
-            <thead className="sticky top-0 z-10 bg-background">
+            <thead className="sticky top-0 z-10 bg-surface">
               <tr className="border-b border-border">
                 <th className="px-4 py-3 font-medium">Order</th>
                 <th className="px-4 py-3 font-medium">Customer</th>
@@ -69,7 +70,9 @@ export function AdminOrderTable() {
                       </Link>
                     </td>
                     <td className="px-4 py-3">{order.customerName || "—"}</td>
-                    <td className="px-4 py-3">{order.statusName}</td>
+                    <td className="px-4 py-3">
+                      <OrderStatusBadge status={order.status} />
+                    </td>
                     <td className="px-4 py-3">
                       {formatMoney(order.totalMinor, order.currency)}
                     </td>

@@ -1,19 +1,19 @@
 import { CheckoutForm } from "@/features/checkout/checkout-form";
 import { ProtectedPage } from "@/server/auth/protect";
 import { PageShell } from "@/ui/page-shell";
-import { TextLink } from "@/ui/text-link";
+import { BackLink } from "@/ui/text-link";
 
 export const instant = false;
 
 export default function CheckoutPage() {
   return (
     <PageShell>
-      <TextLink href="/cart" className="text-sm">
-        Back to cart
-      </TextLink>
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-        Checkout
-      </h1>
+      <BackLink href="/cart">Back to cart</BackLink>
+      <h1 className="text-3xl font-semibold tracking-tight">Checkout</h1>
+      <p className="text-sm text-muted">
+        Review your items and delivery details. Totals are calculated on the
+        server. Payment is cash on delivery.
+      </p>
       <ProtectedPage returnTo="/checkout">
         <CheckoutForm />
       </ProtectedPage>

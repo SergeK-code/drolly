@@ -1,16 +1,59 @@
-import type { PublicOrder } from "@/features/orders/api";
-import { formatMoney } from "@/features/orders/money";
+"use client";
 
-export function OrderSummary({ order }: { order: PublicOrder }) {
+import type { PublicOrder } from "@/features/orders/api";
+import {
+  ORDER_STATUSES,
+  orderStatusName,
+  type OrderStatusCode,
+} from "@/lib/order-status";
+import { formatMoney } from "@/features/orders/money";
+import { Badge } from "@/ui/badge";
+import { cx } from "@/ui/cx";
+
+export function OrderStatusBadge({
+  status,
+}: {
+  status: OrderStatusCode;
+}) {
+  const tone =
+    status === "delivered"
+      ? "success"
+      : status === "cancelled"
+        ? "danger"
+        : status === "pending"
+          ? "warning"
+          : "accent";
+
+  return <Badge tone={tone}>{orderStatusName(status)}</Badge>;
+}
+
+export function OrderSummary({
+  order,
+  onStatusSelect,
+  statusPending = false,
+}: {
+  order: PublicOrder;
+  onStatusSelect?: (status: OrderStatusCode) => void;
+  statusPending?: boolean;
+}) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <p className="text-sm text-muted">{order.orderNumber}</p>
-        <p className="text-lg font-semibold">{order.statusName}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-mono text-sm text-muted">{order.orderNumber}</p>
+          <OrderStatusBadge status={order.status} />
+        </div>
         {order.customerName ? (
           <p className="text-sm text-muted">{order.customerName}</p>
         ) : null}
       </div>
+      {onStatusSelect ? (
+        <OrderStatusChips
+          status={order.status}
+          onSelect={onStatusSelect}
+          pending={statusPending}
+        />
+      ) : null}
       <ul className="flex flex-col gap-2 text-sm">
         {order.items.map((item) => (
           <li key={item.id} className="flex justify-between gap-3">
@@ -48,5 +91,48 @@ export function OrderSummary({ order }: { order: PublicOrder }) {
       </p>
       <p className="text-sm text-muted">Pay cash on delivery.</p>
     </div>
+  );
+}
+
+function OrderStatusChips({
+  status,
+  onSelect,
+  pending,
+}: {
+  status: OrderStatusCode;
+  onSelect: (status: OrderStatusCode) => void;
+  pending: boolean;
+}) {
+  return (
+    <ol className="flex flex-wrap gap-2" aria-label="Order status">
+      {ORDER_STATUSES.map((item) => {
+        const current = item.code === status;
+        return (
+          <li key={item.code}>
+            <button
+              type="button"
+              className={cx(
+                "rounded-full px-2.5 py-1 text-xs font-medium",
+                current
+                  ? item.code === "cancelled"
+                    ? "bg-danger-bg text-danger"
+                    : item.code === "delivered"
+                      ? "bg-success-bg text-success"
+                      : "bg-accent-subtle text-accent"
+                  : "bg-muted-bg text-muted",
+                !current &&
+                  "cursor-pointer hover:bg-accent-subtle hover:text-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+              )}
+              disabled={pending || current}
+              aria-current={current ? "true" : undefined}
+              aria-pressed={current}
+              onClick={() => onSelect(item.code)}
+            >
+              {item.name}
+            </button>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

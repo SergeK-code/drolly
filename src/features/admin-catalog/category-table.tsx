@@ -10,6 +10,7 @@ import {
   useSetCategoryActiveMutation,
 } from "@/features/admin-catalog/hooks";
 import { AdminPanel, AdminTableCard } from "@/features/admin/admin-panel";
+import { Badge } from "@/ui/badge";
 import { Button } from "@/ui/button";
 import { ConfirmModal } from "@/ui/confirm-modal";
 import { Modal } from "@/ui/modal";
@@ -94,7 +95,7 @@ export function CategoryTable() {
           {query.data && query.data.items.length > 0 ? (
             <AdminTableCard>
               <table className="w-full min-w-xl border-collapse text-left text-sm">
-                <thead className="sticky top-0 z-10 bg-background">
+                <thead className="sticky top-0 z-10 bg-surface">
                   <tr className="border-b border-border">
                     <th className="px-4 py-3 font-medium">Category</th>
                     <th className="px-4 py-3 font-medium">Slug</th>
@@ -113,7 +114,9 @@ export function CategoryTable() {
                       <td className="px-4 py-3 font-medium">{category.name}</td>
                       <td className="px-4 py-3 text-muted">{category.slug}</td>
                       <td className="px-4 py-3">
-                        {category.isActive ? "Active" : "Inactive"}
+                        <Badge tone={category.isActive ? "success" : "neutral"}>
+                          {category.isActive ? "Active" : "Inactive"}
+                        </Badge>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap justify-end gap-2">

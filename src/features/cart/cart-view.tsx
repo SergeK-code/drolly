@@ -15,8 +15,11 @@ import {
   type CartRefreshState,
 } from "@/features/cart/cart-state";
 import { useCart } from "@/features/cart/cart-store";
-import { Button } from "@/ui/button";
+import { Minus, Plus } from "lucide-react";
+import { Button, ButtonLink } from "@/ui/button";
+import { Icon } from "@/ui/icon";
 import { ConfirmModal } from "@/ui/confirm-modal";
+import { EmptyState } from "@/ui/empty-state";
 import { MediaImage } from "@/ui/media-image";
 import { TextLink } from "@/ui/text-link";
 
@@ -79,12 +82,15 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm text-muted">Your cart is empty.</p>
-        <TextLink href="/" onClick={onContinue}>
-          Browse products
-        </TextLink>
-      </div>
+      <EmptyState
+        title="Your cart is empty."
+        description="Add products from the catalog, then return here to check out."
+        action={
+          <TextLink href="/" onClick={onContinue}>
+            Browse products
+          </TextLink>
+        }
+      />
     );
   }
 
@@ -128,7 +134,7 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
         {lines.map(({ item, live, status, priceMinor, currency, query }) => (
           <li
             key={item.productId}
-            className="flex gap-3 border-b border-border pb-4 last:border-b-0 last:pb-0"
+            className="flex gap-4 rounded-lg bg-surface p-3 ring-1 ring-border"
           >
             <MediaImage
               src={catalogImageUrl(
@@ -178,7 +184,7 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
         ))}
       </ul>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-3 rounded-lg bg-muted-bg/80 p-4 ring-1 ring-border">
         {loading ? (
           <p className="text-sm text-muted">Checking availability…</p>
         ) : null}
@@ -196,13 +202,9 @@ export function CartView({ onContinue }: { onContinue?: () => void }) {
             : "Prices and stock are checked again at checkout. This total is only a preview."}
         </p>
         <div className="flex flex-wrap gap-2">
-          <TextLink
-            href="/checkout"
-            onClick={onContinue}
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground shadow-sm hover:bg-accent-hover"
-          >
+          <ButtonLink href="/checkout" onClick={onContinue}>
             Checkout
-          </TextLink>
+          </ButtonLink>
           <Button
             variant="secondary"
             size="sm"
@@ -307,7 +309,7 @@ function QuantityControls({
         disabled={disabled || quantity <= 1}
         onClick={() => onChange(quantity - 1)}
       >
-        −
+        <Icon icon={Minus} />
       </Button>
       <span className="min-w-8 text-center text-sm" aria-live="polite">
         {quantity}
@@ -319,7 +321,7 @@ function QuantityControls({
         disabled={disabled || (max !== undefined && quantity >= max)}
         onClick={() => onChange(quantity + 1)}
       >
-        +
+        <Icon icon={Plus} />
       </Button>
     </div>
   );

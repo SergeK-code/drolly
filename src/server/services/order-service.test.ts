@@ -1,20 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AppError } from "@/server/http/api";
 import type { PublicUser } from "@/server/auth/public-user";
 
-const { getOrderById, listOrders, updateOrderStatusRow } = vi.hoisted(() => ({
-  getOrderById: vi.fn(),
-  listOrders: vi.fn(),
-  updateOrderStatusRow: vi.fn(),
-}));
+const { getOrderById, listOrders, updateOrderStatusRow, cancelOwnOrderRow } =
+  vi.hoisted(() => ({
+    getOrderById: vi.fn(),
+    listOrders: vi.fn(),
+    updateOrderStatusRow: vi.fn(),
+    cancelOwnOrderRow: vi.fn(),
+  }));
 
 vi.mock("@/server/repositories/order-repository", () => ({
   getOrderById,
   listOrders,
   updateOrderStatusRow,
+  cancelOwnOrderRow,
 }));
 
 import {
+  cancelCustomerOrder,
   getCustomerOrder,
   listCustomerOrders,
   updateAdminOrderStatus,
@@ -43,6 +46,7 @@ describe("customer orders", () => {
     getOrderById.mockReset();
     listOrders.mockReset();
     updateOrderStatusRow.mockReset();
+    cancelOwnOrderRow.mockReset();
   });
 
   it("scopes the list to the signed-in customer", async () => {
@@ -54,12 +58,36 @@ describe("customer orders", () => {
     );
   });
 
-  it("does not let a customer change status", async () => {
+  it("does not let a customer change status through the admin API", async () => {
     getOrderById.mockResolvedValue(order);
     await expect(
       updateAdminOrderStatus(customer, "order-1", "confirmed"),
     ).rejects.toMatchObject({ status: 403 });
     expect(updateOrderStatusRow).not.toHaveBeenCalled();
+  });
+
+  it("lets a customer cancel a pending order", async () => {
+    getOrderById.mockResolvedValue(order);
+    cancelOwnOrderRow.mockResolvedValue({ ...order, status: "cancelled" });
+
+    await cancelCustomerOrder(customer, "order-1");
+
+    expect(cancelOwnOrderRow).toHaveBeenCalledWith("order-1");
+  });
+
+  it("rejects customer cancel after the order is being prepared", async () => {
+    getOrderById.mockResolvedValue({ ...order, status: "preparing" });
+    await expect(cancelCustomerOrder(customer, "order-1")).rejects.toMatchObject({
+      status: 409,
+    });
+    expect(cancelOwnOrderRow).not.toHaveBeenCalled();
+  });
+
+  it("does not let an admin use the customer cancel path", async () => {
+    await expect(cancelCustomerOrder(admin, "order-1")).rejects.toMatchObject({
+      status: 403,
+    });
+    expect(cancelOwnOrderRow).not.toHaveBeenCalled();
   });
 });
 
@@ -69,24 +97,23 @@ describe("admin status updates", () => {
     updateOrderStatusRow.mockReset();
   });
 
-  it("applies an allowed transition", async () => {
+  it("applies any catalog status", async () => {
     getOrderById.mockResolvedValue(order);
-    updateOrderStatusRow.mockResolvedValue({ ...order, status: "confirmed" });
+    updateOrderStatusRow.mockResolvedValue({ ...order, status: "delivered" });
 
-    await updateAdminOrderStatus(admin, "order-1", "confirmed");
+    await updateAdminOrderStatus(admin, "order-1", "delivered");
 
     expect(updateOrderStatusRow).toHaveBeenCalledWith({
       orderId: "order-1",
       fromStatus: "pending",
-      toStatus: "confirmed",
+      toStatus: "delivered",
     });
   });
 
-  it("rejects a skip from pending to delivered", async () => {
+  it("skips a no-op when the status is unchanged", async () => {
     getOrderById.mockResolvedValue(order);
-    await expect(
-      updateAdminOrderStatus(admin, "order-1", "delivered"),
-    ).rejects.toBeInstanceOf(AppError);
+    const result = await updateAdminOrderStatus(admin, "order-1", "pending");
+    expect(result).toEqual(order);
     expect(updateOrderStatusRow).not.toHaveBeenCalled();
   });
 });

@@ -133,7 +133,7 @@ One row for the single store.
 | `contact_email` | text nullable | Contact |
 | `currency` | char(3) | Store currency |
 | `delivery_fee_minor` | integer | Base delivery fee |
-| `minimum_order_minor` | integer | Minimum order |
+| `minimum_order_minor` | integer | Stored for later use; not enforced at checkout |
 | `updated_at` | timestamptz | Last update |
 
 ## Relationships
@@ -167,12 +167,13 @@ Checkout must be atomic. Implement a PostgreSQL function/RPC or an equivalent ca
 3. Loads current active products and prices from the database.
 4. Checks quantities and available stock.
 5. Calculates subtotal, delivery fee and total using integer arithmetic.
-6. Checks the minimum order amount.
-7. Inserts the order and order-item snapshots.
-8. Decrements stock safely so two concurrent checkouts cannot oversell.
-9. Records a unique idempotency key/result to prevent duplicate orders after retries.
+6. Inserts the order and order-item snapshots.
+7. Decrements stock safely so two concurrent checkouts cannot oversell.
+8. Records a unique idempotency key/result to prevent duplicate orders after retries.
 
 The API must not accept a client-computed total as authoritative. If implementing the full atomic function is beyond the first course milestone, do not ship checkout until stock and order creation are transactionally safe.
+
+Cancelling an order must restore each line’s quantity onto `products.stock_quantity` in the same transaction as the status change (`update_order_status` for admins, `cancel_own_order` for customers). Customers may cancel only their own `pending` or `confirmed` orders. Moving an order out of `cancelled` decrements stock again and fails if there is not enough inventory. Lines whose `product_id` is null (deleted products) are skipped on restore.
 
 ## RLS policy intent
 

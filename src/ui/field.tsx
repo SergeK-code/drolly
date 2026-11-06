@@ -33,7 +33,7 @@ export function Field({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-foreground">
+      <label htmlFor={id} className="text-sm font-medium tracking-tight text-foreground">
         {label}
       </label>
       {control}

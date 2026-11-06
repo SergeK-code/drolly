@@ -50,17 +50,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       <NoticeFlash showToast={showToast} />
       {children}
-      <div className="pointer-events-none fixed inset-x-0 top-3 z-[60] flex flex-col items-center gap-2 px-4 sm:items-end sm:px-6">
+      <div className="pointer-events-none fixed inset-x-0 top-3 z-[80] flex flex-col items-center gap-2 px-4 sm:items-end sm:px-6">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.p
               key={toast.id}
               role={toast.tone === "error" ? "alert" : "status"}
               className={cx(
-                "pointer-events-auto w-full max-w-sm rounded-md px-4 py-3 text-sm shadow-md ring-1 ring-border",
+                "pointer-events-auto w-full max-w-sm rounded-md px-4 py-3 text-sm shadow-md ring-1",
                 toast.tone === "success"
-                  ? "bg-surface text-success"
-                  : "bg-surface text-danger",
+                  ? "bg-success-bg text-success ring-success/20"
+                  : "bg-danger-bg text-danger ring-danger/20",
               )}
               {...fadeSlide}
               transition={motionTransition(reduce)}

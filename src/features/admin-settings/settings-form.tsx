@@ -31,6 +31,10 @@ export function StoreSettingsForm() {
     event.preventDefault();
     setFieldErrors({});
 
+    if (!settings) {
+      return;
+    }
+
     const form = new FormData(event.currentTarget);
     const parsed = validateForm(storeSettingsWriteSchema, {
       storeName: String(form.get("storeName") ?? ""),
@@ -38,7 +42,7 @@ export function StoreSettingsForm() {
       contactEmail: String(form.get("contactEmail") ?? "").trim() || null,
       currency: String(form.get("currency") ?? ""),
       deliveryFeeMinor: form.get("deliveryFeeMinor"),
-      minimumOrderMinor: form.get("minimumOrderMinor"),
+      minimumOrderMinor: settings.minimumOrderMinor,
     });
     if (!parsed.success) {
       setFieldErrors(parsed.fieldErrors);
@@ -60,7 +64,7 @@ export function StoreSettingsForm() {
   return (
     <AdminPanel
       title="Store settings"
-      description="Checkout reads delivery fee, minimum order and currency from the database, not from the browser. Keep currency the same as your products or checkout will reject mixed-currency carts."
+      description="Checkout reads delivery fee and currency from the database, not from the browser. Keep currency the same as your products or checkout will reject mixed-currency carts."
     >
       <QueryState
         isPending={query.isPending}
@@ -136,19 +140,6 @@ export function StoreSettingsForm() {
                   type="number"
                   min={0}
                   defaultValue={String(settings.deliveryFeeMinor)}
-                />
-              </Field>
-              <Field
-                id="store-min"
-                label="Minimum order (minor units)"
-                error={firstFieldError(fieldErrors, "minimumOrderMinor")}
-              >
-                <Input
-                  id="store-min"
-                  name="minimumOrderMinor"
-                  type="number"
-                  min={0}
-                  defaultValue={String(settings.minimumOrderMinor)}
                 />
               </Field>
               <Button type="submit" disabled={update.isPending} className="w-fit">
