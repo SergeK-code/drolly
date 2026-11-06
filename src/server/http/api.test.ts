@@ -16,64 +16,68 @@ describe("formatApiError", () => {
     [500, "DATABASE_ERROR", "An unexpected error occurred."],
   ] as const)(
     "maps AppError status %s to a dedicated public message",
-    (status, code, message) => {
-      const result = formatApiError(
+    async (status, code, message) => {
+      const response = formatApiError(
         new AppError(code, status, "internal or database detail"),
         REQUEST_ID,
       );
+      const body = await response.json();
 
-      expect(result.status).toBe(status);
-      expect(result.body).toEqual({
+      expect(response.status).toBe(status);
+      expect(response.headers.get("x-request-id")).toBe(REQUEST_ID);
+      expect(body).toEqual({
         success: false,
         error: { code, message, requestId: REQUEST_ID },
       });
-      expect(JSON.stringify(result.body)).not.toContain("internal or database");
+      expect(JSON.stringify(body)).not.toContain("internal or database");
     },
   );
 
-  it("includes field errors on AppError", () => {
+  it("includes field errors on AppError", async () => {
     const error = new AppError("VALIDATION_ERROR", 422, "secret", {
       email: ["Required"],
     });
 
-    const result = formatApiError(error, REQUEST_ID);
+    const body = await formatApiError(error, REQUEST_ID).json();
 
-    expect(result.body.error.fieldErrors).toEqual({ email: ["Required"] });
-    expect(result.body.error.message).toBe("Validation failed");
+    expect(body.error.fieldErrors).toEqual({ email: ["Required"] });
+    expect(body.error.message).toBe("Validation failed");
   });
 
-  it("maps Zod errors to a validation envelope", () => {
+  it("maps Zod errors to a validation envelope", async () => {
     const parsed = z.object({ name: z.string().min(1) }).safeParse({});
     expect(parsed.success).toBe(false);
     if (parsed.success) {
       return;
     }
 
-    const result = formatApiError(parsed.error, REQUEST_ID);
+    const response = formatApiError(parsed.error, REQUEST_ID);
+    const body = await response.json();
 
-    expect(result.status).toBe(422);
-    expect(result.body.error.code).toBe("VALIDATION_ERROR");
-    expect(result.body.error.message).toBe("Validation failed");
-    expect(result.body.error.requestId).toBe(REQUEST_ID);
-    expect(result.body.error.fieldErrors).toMatchObject({
+    expect(response.status).toBe(422);
+    expect(body.error.code).toBe("VALIDATION_ERROR");
+    expect(body.error.message).toBe("Validation failed");
+    expect(body.error.requestId).toBe(REQUEST_ID);
+    expect(body.error.fieldErrors).toMatchObject({
       name: expect.any(Array),
     });
   });
 
-  it("hides unknown errors, stacks and database messages", () => {
+  it("hides unknown errors, stacks and database messages", async () => {
     const error = new Error('relation "orders" does not exist');
     error.stack =
       'Error: relation "orders" does not exist\n    at secret.ts:1:1';
 
-    const result = formatApiError(error, REQUEST_ID);
+    const response = formatApiError(error, REQUEST_ID);
+    const body = await response.json();
 
-    expect(result.status).toBe(500);
-    expect(result.body.error.code).toBe("INTERNAL_ERROR");
-    expect(result.body.error.message).toBe("An unexpected error occurred.");
-    expect(result.body.error.requestId).toBe(REQUEST_ID);
-    expect(JSON.stringify(result.body)).not.toContain("orders");
-    expect(JSON.stringify(result.body)).not.toContain("secret.ts");
-    expect(JSON.stringify(result.body)).not.toContain("stack");
+    expect(response.status).toBe(500);
+    expect(body.error.code).toBe("INTERNAL_ERROR");
+    expect(body.error.message).toBe("An unexpected error occurred.");
+    expect(body.error.requestId).toBe(REQUEST_ID);
+    expect(JSON.stringify(body)).not.toContain("orders");
+    expect(JSON.stringify(body)).not.toContain("secret.ts");
+    expect(JSON.stringify(body)).not.toContain("stack");
   });
 });
 

@@ -1,6 +1,12 @@
 # Next.js Architecture Guide: Validation, Error Handling, and Layers
 
-This document outlines the architectural standards for validation, error handling, and separation of concerns in our Next.js App Router API (`src/app/api/...`). It maps our clean-architecture principles to Next.js Route Handlers.
+This project follows the guide's idea: validate input, throw a known error from the service, and let one wrapper turn that throw into the HTTP response. The concrete shapes live in `src/server/http/api.ts`.
+
+Success is always `{ success: true, data }`. Error is always `{ success: false, error: { code, message, requestId, fieldErrors? } }`. `jsonResponse` is the only function that sets the HTTP status and the `x-request-id` header. The JSON body never contains the status or the header.
+
+`apiHandler` is the try/catch. Routes do not repeat it. A success returns `jsonSuccess`. A throw is logged with the request id, and the catch returns the response from the error formatter. The logged message can be the specific thrown sentence. The JSON `message` is the plain sentence for that status, so SQL, stacks, and `Error.message` stay on the server. The form reads `error.message` for the toast and `error.fieldErrors` for the inputs.
+
+The sample below shows the same idea with RFC 9457 and a try/catch copied into every route. This repository does not use that sample. Copying it would add a second error shape, and its generic branch puts `Error.message` in the response.
 
 ---
 
@@ -164,10 +170,10 @@ export async function POST(req: NextRequest) {
 
 ---
 
-## 5. Instructions for Cursor
+## 5. What to implement in this repository
 
-When generating or refactoring code in this Next.js project, Cursor must adhere to:
-1. **Route Handlers Structure:** Wrap all `src/app/api/.../route.ts` logic inside try/catch blocks that pass errors to `handleApiError()`.
-2. **No Business Logic in Routes:** Route handlers only parse inputs, call services, and return responses.
-3. **Strict Validation:** Always run incoming request bodies and query strings through a Zod schema validation helper.
-4. **Standard Errors:** Throw `conflict()`, `notFound()`, or `ValidationError` from services and helper functions rather than returning custom error response objects manually.
+1. Wrap every route with `apiHandler` from `src/server/http/api.ts`. Do not copy a try/catch into each route.
+2. Return success only through `jsonSuccess`, so the body is `{ success: true, data }`.
+3. Throw `AppError` helpers (`validationFailed`, `unauthenticated`, `forbidden`, `notFound`, `conflict`, `rateLimited`, `serviceUnavailable`). The catch turns them into `{ success: false, error }`.
+4. Validate with `validateData`. Keep business rules in the service and database calls in the repository.
+5. Log the thrown message with the request id. Send the plain status sentence to the browser.

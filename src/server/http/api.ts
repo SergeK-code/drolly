@@ -32,16 +32,25 @@ export type ApiErrorBody = {
   };
 };
 
+function jsonResponse(
+  body: unknown,
+  status: number,
+  requestId: string,
+): NextResponse {
+  return NextResponse.json(body, {
+    status,
+    headers: { "x-request-id": requestId },
+  });
+}
+
 export function jsonSuccess<T>(
   data: T,
   options: { status?: number; requestId: string },
 ): NextResponse {
-  return NextResponse.json(
+  return jsonResponse(
     { success: true as const, data },
-    {
-      status: options.status ?? 200,
-      headers: { "x-request-id": options.requestId },
-    },
+    options.status ?? 200,
+    options.requestId,
   );
 }
 
@@ -107,24 +116,62 @@ export function validateData<T>(schema: z.ZodType<T>, data: unknown): T {
   return result.data;
 }
 
-export function formatApiError(
-  error: unknown,
-  requestId: string,
-): { status: number; body: ApiErrorBody } {
+type ClassifiedError = {
+  status: number;
+  code: string;
+  fieldErrors?: Record<string, string[]>;
+};
+
+function classifyApiError(error: unknown): ClassifiedError {
   if (error instanceof AppError) {
-    return errorResponse(error.status, error.code, requestId, error.fieldErrors);
+    return {
+      status: error.status,
+      code: error.code,
+      fieldErrors: error.fieldErrors,
+    };
   }
 
   if (error instanceof z.ZodError) {
-    return errorResponse(
-      422,
-      "VALIDATION_ERROR",
-      requestId,
-      fieldErrorsFromZod(error),
-    );
+    return {
+      status: 422,
+      code: "VALIDATION_ERROR",
+      fieldErrors: fieldErrorsFromZod(error),
+    };
   }
 
-  return errorResponse(500, "INTERNAL_ERROR", requestId);
+  return { status: 500, code: "INTERNAL_ERROR" };
+}
+
+function apiErrorResponse(
+  error: unknown,
+  requestId: string,
+): { status: number; code: string; response: NextResponse } {
+  const failure = classifyApiError(error);
+  const body: ApiErrorBody = {
+    success: false,
+    error: {
+      code: failure.code,
+      message:
+        PUBLIC_STATUS_MESSAGES[failure.status] ?? PUBLIC_STATUS_MESSAGES[500],
+      requestId,
+      ...(failure.fieldErrors && Object.keys(failure.fieldErrors).length > 0
+        ? { fieldErrors: failure.fieldErrors }
+        : {}),
+    },
+  };
+
+  return {
+    status: failure.status,
+    code: failure.code,
+    response: jsonResponse(body, failure.status, requestId),
+  };
+}
+
+export function formatApiError(
+  error: unknown,
+  requestId: string,
+): NextResponse {
+  return apiErrorResponse(error, requestId).response;
 }
 
 export function apiHandler(
@@ -153,26 +200,21 @@ export function apiHandler(
       );
       return response;
     } catch (error) {
-      const formatted = formatApiError(error, requestId);
+      const formatted = apiErrorResponse(error, requestId);
       const message =
-        error instanceof Error ? error.message : formatted.body.error.message;
+        error instanceof Error ? error.message : "An unexpected error occurred.";
+      const details = {
+        requestId,
+        code: formatted.code,
+        status: formatted.status,
+        message,
+        err: safeErrorContext(error),
+      };
 
       if (formatted.status >= 500) {
-        logger.error(
-          { requestId, err: safeErrorContext(error), message },
-          message,
-        );
+        logger.error(details, message);
       } else {
-        logger.warn(
-          {
-            requestId,
-            code: formatted.body.error.code,
-            status: formatted.status,
-            message,
-            err: safeErrorContext(error),
-          },
-          message,
-        );
+        logger.warn(details, message);
       }
 
       logger.info(
@@ -187,33 +229,8 @@ export function apiHandler(
         "API request failed",
       );
 
-      return NextResponse.json(formatted.body, {
-        status: formatted.status,
-        headers: { "x-request-id": requestId },
-      });
+      return formatted.response;
     }
-  };
-}
-
-function errorResponse(
-  status: number,
-  code: string,
-  requestId: string,
-  fieldErrors?: Record<string, string[]>,
-): { status: number; body: ApiErrorBody } {
-  return {
-    status,
-    body: {
-      success: false,
-      error: {
-        code,
-        message: PUBLIC_STATUS_MESSAGES[status] ?? PUBLIC_STATUS_MESSAGES[500],
-        requestId,
-        ...(fieldErrors && Object.keys(fieldErrors).length > 0
-          ? { fieldErrors }
-          : {}),
-      },
-    },
   };
 }
 
