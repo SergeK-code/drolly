@@ -122,7 +122,7 @@ export function ProductTable() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <MediaImage
-                        src={catalogImageUrl(product.slug)}
+                        src={catalogImageUrl(product.slug, product.imagePath)}
                         alt=""
                         className="h-10 w-10 shrink-0 rounded-md"
                       />

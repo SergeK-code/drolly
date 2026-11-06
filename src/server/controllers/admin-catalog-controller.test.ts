@@ -79,6 +79,24 @@ afterEach(() => {
 });
 
 describe("createProduct", () => {
+  it("creates a product when the body is valid", async () => {
+    createAdminProduct.mockResolvedValue({ id: "p1" });
+    const request = new Request("http://localhost:3000/api/admin/products", {
+      method: "POST",
+      headers: {
+        origin: "http://localhost:3000",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(validBody),
+    });
+
+    const response = await createProduct(request, "req_ok");
+    expect(response.status).toBe(201);
+    expect(createAdminProduct).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Mint tea", currency: "USD" }),
+    );
+  });
+
   it("rejects privileged fields", async () => {
     const request = new Request("http://localhost:3000/api/admin/products", {
       method: "POST",

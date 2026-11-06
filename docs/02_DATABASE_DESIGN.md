@@ -183,5 +183,6 @@ Enable RLS on all application tables.
 - Admin: manage catalog, read/update orders and settings.
 - Roles: users must not be able to change their own role. Admin role assignment is only through a trusted provisioning path.
 - Lookup tables: allow necessary reads; block arbitrary writes from ordinary users.
+- Storage bucket `catalog`: public read of objects; insert/update/delete only for `authenticated` sessions where `is_admin()` is true. The app stores only the object path on `categories.image_path` and `products.image_path`.
 
 RLS is not a replacement for service-layer authorization. Test policies using both customer and admin sessions.

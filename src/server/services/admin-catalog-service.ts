@@ -80,6 +80,7 @@ export async function createAdminCategory(
     slug,
     description: input.description,
     sortOrder: input.sortOrder,
+    imagePath: input.imagePath,
   });
   return toAdminCategory(row);
 }
@@ -98,6 +99,7 @@ export async function updateAdminCategory(
     slug,
     description: input.description,
     sortOrder: input.sortOrder,
+    imagePath: input.imagePath,
   });
   return toAdminCategory(row);
 }
@@ -178,6 +180,7 @@ export async function createAdminProduct(
     priceMinor: input.priceMinor,
     currency: input.currency,
     stockQuantity: input.stockQuantity,
+    imagePath: input.imagePath,
   });
   return toAdminProduct(row);
 }
@@ -198,6 +201,7 @@ export async function updateAdminProduct(
     priceMinor: input.priceMinor,
     currency: input.currency,
     stockQuantity: input.stockQuantity,
+    imagePath: input.imagePath,
   });
   return toAdminProduct(row);
 }

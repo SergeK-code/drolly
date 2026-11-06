@@ -25,5 +25,9 @@ export function catalogImageUrl(seed: string, storedPath?: string | null): strin
     return storedPath;
   }
 
+  if (storedPath && /^(products|categories)\//.test(storedPath) && !storedPath.includes("..")) {
+    return `/api/media/${storedPath}`;
+  }
+
   return pick(seed, PRODUCT_IMAGES);
 }

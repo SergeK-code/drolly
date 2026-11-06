@@ -11,4 +11,13 @@ describe("catalogImageUrl", () => {
   it("returns a stable placeholder for the same seed", () => {
     expect(catalogImageUrl("mint-tea")).toBe(catalogImageUrl("mint-tea"));
   });
+
+  it("maps a stored object path to the media route", () => {
+    expect(
+      catalogImageUrl(
+        "mint-tea",
+        "products/11111111-1111-4111-8111-111111111111.jpg",
+      ),
+    ).toBe("/api/media/products/11111111-1111-4111-8111-111111111111.jpg");
+  });
 });

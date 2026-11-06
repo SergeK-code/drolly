@@ -7,6 +7,7 @@ export type AdminCategory = {
   description: string | null;
   sortOrder: number;
   isActive: boolean;
+  imagePath: string | null;
 };
 
 export type AdminProduct = {
@@ -21,6 +22,7 @@ export type AdminProduct = {
   currency: string;
   stockQuantity: number;
   isActive: boolean;
+  imagePath: string | null;
 };
 
 export function toAdminCategory(row: CatalogCategoryRow): AdminCategory {
@@ -31,6 +33,7 @@ export function toAdminCategory(row: CatalogCategoryRow): AdminCategory {
     description: row.description,
     sortOrder: row.sortOrder,
     isActive: row.isActive,
+    imagePath: row.imagePath,
   };
 }
 
@@ -47,5 +50,6 @@ export function toAdminProduct(row: CatalogProductRow): AdminProduct {
     currency: row.currency,
     stockQuantity: row.stockQuantity,
     isActive: row.isActive,
+    imagePath: row.imagePath,
   };
 }

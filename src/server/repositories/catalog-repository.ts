@@ -247,6 +247,7 @@ export async function insertCategory(input: {
   slug: string;
   description: string | null;
   sortOrder: number;
+  imagePath?: string | null;
 }): Promise<CatalogCategoryRow> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
@@ -256,6 +257,7 @@ export async function insertCategory(input: {
       slug: input.slug,
       description: input.description,
       sort_order: input.sortOrder,
+      image_path: input.imagePath ?? null,
       is_active: true,
     })
     .select(CATEGORY_SELECT)
@@ -272,6 +274,7 @@ export async function updateCategory(
     slug: string;
     description: string | null;
     sortOrder: number;
+    imagePath?: string | null;
   },
 ): Promise<CatalogCategoryRow> {
   const supabase = await createSupabaseServerClient();
@@ -282,6 +285,7 @@ export async function updateCategory(
       slug: input.slug,
       description: input.description,
       sort_order: input.sortOrder,
+      image_path: input.imagePath ?? null,
     })
     .eq("id", id)
     .select(CATEGORY_SELECT)
@@ -419,6 +423,7 @@ export async function insertProduct(input: {
   priceMinor: number;
   currency: string;
   stockQuantity: number;
+  imagePath?: string | null;
 }): Promise<CatalogProductRow> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
@@ -431,6 +436,7 @@ export async function insertProduct(input: {
       price_minor: input.priceMinor,
       currency: input.currency,
       stock_quantity: input.stockQuantity,
+      image_path: input.imagePath ?? null,
       is_active: true,
     })
     .select(ADMIN_PRODUCT_SELECT)
@@ -450,6 +456,7 @@ export async function updateProduct(
     priceMinor: number;
     currency: string;
     stockQuantity: number;
+    imagePath?: string | null;
   },
 ): Promise<CatalogProductRow> {
   const supabase = await createSupabaseServerClient();
@@ -463,6 +470,7 @@ export async function updateProduct(
       price_minor: input.priceMinor,
       currency: input.currency,
       stock_quantity: input.stockQuantity,
+      image_path: input.imagePath ?? null,
     })
     .eq("id", id)
     .select(ADMIN_PRODUCT_SELECT)

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { catalogObjectPathSchema } from "@/lib/image-upload";
 
 const emptyToNull = (value: unknown) => {
   if (typeof value !== "string") {
@@ -25,6 +26,10 @@ export const adminCategoryWriteSchema = z
       .int("Sort order must be a whole number.")
       .nonnegative("Sort order cannot be negative.")
       .default(0),
+    imagePath: z.preprocess(
+      (value) => (value === undefined ? undefined : emptyToNull(value)),
+      catalogObjectPathSchema.nullable().optional(),
+    ),
   })
   .strict();
 
@@ -58,6 +63,10 @@ export const adminProductWriteSchema = z
       .number({ error: "Enter a stock quantity." })
       .int("Stock must be a whole number.")
       .nonnegative("Stock cannot be negative."),
+    imagePath: z.preprocess(
+      (value) => (value === undefined ? undefined : emptyToNull(value)),
+      catalogObjectPathSchema.nullable().optional(),
+    ),
   })
   .strict();
 

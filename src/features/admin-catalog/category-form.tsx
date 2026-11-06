@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import type { AdminCategory } from "@/features/admin-catalog/api";
+import { uploadAdminImage, type AdminCategory } from "@/features/admin-catalog/api";
 import {
   useCreateCategoryMutation,
   useUpdateCategoryMutation,
 } from "@/features/admin-catalog/hooks";
 import { explainApiError } from "@/lib/api";
 import { adminCategoryWriteSchema } from "@/lib/admin-catalog-schemas";
+import { catalogImageUrl } from "@/lib/catalog-media";
 import {
   firstFieldError,
   validateForm,
@@ -16,6 +17,7 @@ import {
 import { Button } from "@/ui/button";
 import { Field } from "@/ui/field";
 import { Input, Textarea } from "@/ui/input";
+import { MediaImage } from "@/ui/media-image";
 import { useToast } from "@/ui/toast";
 
 export function CategoryForm({
@@ -28,8 +30,13 @@ export function CategoryForm({
   const { showToast } = useToast();
   const createMutation = useCreateCategoryMutation();
   const updateMutation = useUpdateCategoryMutation(category?.id ?? "");
-  const pending = createMutation.isPending || updateMutation.isPending;
+  const [uploading, setUploading] = useState(false);
+  const pending =
+    createMutation.isPending || updateMutation.isPending || uploading;
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [imagePath, setImagePath] = useState<string | null>(
+    category?.imagePath ?? null,
+  );
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -47,11 +54,23 @@ export function CategoryForm({
     }
 
     try {
+      const fileInput = event.currentTarget.elements.namedItem("image");
+      const file =
+        fileInput instanceof HTMLInputElement ? fileInput.files?.[0] : undefined;
+      let nextImagePath = imagePath;
+      if (file) {
+        setUploading(true);
+        const uploaded = await uploadAdminImage(file, "categories");
+        nextImagePath = uploaded.path;
+        setImagePath(uploaded.path);
+      }
+
+      const payload = { ...parsed.data, imagePath: nextImagePath };
       if (category) {
-        await updateMutation.mutateAsync(parsed.data);
+        await updateMutation.mutateAsync(payload);
         showToast("success", "Category saved.");
       } else {
-        await createMutation.mutateAsync(parsed.data);
+        await createMutation.mutateAsync(payload);
         showToast("success", "Category created.");
       }
       onSaved?.();
@@ -61,6 +80,8 @@ export function CategoryForm({
       if (Object.keys(explained.fieldErrors).length === 0) {
         showToast("error", explained.message);
       }
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -88,6 +109,28 @@ export function CategoryForm({
           rows={3}
           defaultValue={category?.description ?? ""}
         />
+      </Field>
+      <Field
+        id="category-image"
+        label="Image"
+        error={firstFieldError(fieldErrors, "file")}
+      >
+        <Input
+          id="category-image"
+          name="image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        />
+        <p className="text-xs text-muted">
+          JPG, PNG or WebP, up to 2 MB. The file is uploaded when you save.
+        </p>
+        <div className="mt-1 h-24 w-24 overflow-hidden rounded-md">
+          <MediaImage
+            src={catalogImageUrl(category?.slug ?? "new-category", imagePath)}
+            alt=""
+            className="h-24 w-24"
+          />
+        </div>
       </Field>
       <Field
         id="category-sort"

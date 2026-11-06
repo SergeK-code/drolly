@@ -53,7 +53,6 @@ const BANNED_FIELDS = [
   "owner",
   "isActive",
   "is_active",
-  "imagePath",
   "image_path",
   "stockAdjustment",
   "slug",

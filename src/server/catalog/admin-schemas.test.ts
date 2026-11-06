@@ -40,6 +40,21 @@ describe("adminProductWriteSchema", () => {
       adminProductWriteSchema.safeParse({ ...valid, currency: "US" }).success,
     ).toBe(false);
   });
+
+  it("accepts a generated storage path and rejects traversal", () => {
+    expect(
+      adminProductWriteSchema.safeParse({
+        ...valid,
+        imagePath: "products/11111111-1111-4111-8111-111111111111.jpg",
+      }).success,
+    ).toBe(true);
+    expect(
+      adminProductWriteSchema.safeParse({
+        ...valid,
+        imagePath: "../secret.jpg",
+      }).success,
+    ).toBe(false);
+  });
 });
 
 describe("adminCategoryWriteSchema", () => {

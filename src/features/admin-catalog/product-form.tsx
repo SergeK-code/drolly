@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import type { AdminCategory, AdminProduct } from "@/features/admin-catalog/api";
+import { uploadAdminImage } from "@/features/admin-catalog/api";
 import {
   useCreateProductMutation,
   useUpdateProductMutation,
@@ -32,9 +33,14 @@ export function ProductForm({
   const { showToast } = useToast();
   const createMutation = useCreateProductMutation();
   const updateMutation = useUpdateProductMutation(product?.id ?? "");
-  const pending = createMutation.isPending || updateMutation.isPending;
+  const [uploading, setUploading] = useState(false);
+  const pending =
+    createMutation.isPending || updateMutation.isPending || uploading;
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePath, setImagePath] = useState<string | null>(
+    product?.imagePath ?? null,
+  );
 
   useEffect(() => {
     return () => {
@@ -63,11 +69,23 @@ export function ProductForm({
     }
 
     try {
+      const fileInput = event.currentTarget.elements.namedItem("image");
+      const file =
+        fileInput instanceof HTMLInputElement ? fileInput.files?.[0] : undefined;
+      let nextImagePath = imagePath;
+      if (file) {
+        setUploading(true);
+        const uploaded = await uploadAdminImage(file, "products");
+        nextImagePath = uploaded.path;
+        setImagePath(uploaded.path);
+      }
+
+      const payload = { ...parsed.data, imagePath: nextImagePath };
       if (product) {
-        await updateMutation.mutateAsync(parsed.data);
+        await updateMutation.mutateAsync(payload);
         showToast("success", "Product saved.");
       } else {
-        await createMutation.mutateAsync(parsed.data);
+        await createMutation.mutateAsync(payload);
         showToast("success", "Product created.");
       }
       onSaved?.();
@@ -77,6 +95,8 @@ export function ProductForm({
       if (Object.keys(explained.fieldErrors).length === 0) {
         showToast("error", explained.message);
       }
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -144,11 +164,16 @@ export function ProductForm({
           defaultValue={product?.currency ?? "USD"}
         />
       </Field>
-      <Field id="product-image" label="Image">
+      <Field
+        id="product-image"
+        label="Image"
+        error={firstFieldError(fieldErrors, "file")}
+      >
         <Input
           id="product-image"
+          name="image"
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           onChange={(event) => {
             const file = event.target.files?.[0];
             setImagePreview((current) => {
@@ -160,7 +185,7 @@ export function ProductForm({
           }}
         />
         <p className="text-xs text-muted">
-          Preview only. The image is not uploaded yet.
+          JPG, PNG or WebP, up to 2 MB. The file is uploaded when you save.
         </p>
         {imagePreview ? (
           <>
@@ -174,7 +199,10 @@ export function ProductForm({
         ) : (
           <div className="mt-1 h-32 w-32 overflow-hidden rounded-md">
             <MediaImage
-              src={catalogImageUrl(product?.slug ?? "new-product")}
+              src={catalogImageUrl(
+                product?.slug ?? "new-product",
+                imagePath,
+              )}
               alt="Product"
               className="h-32 w-32"
             />

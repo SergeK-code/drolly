@@ -12,6 +12,7 @@ export type AdminCategory = {
   description: string | null;
   sortOrder: number;
   isActive: boolean;
+  imagePath: string | null;
 };
 
 export type AdminProduct = {
@@ -26,6 +27,7 @@ export type AdminProduct = {
   currency: string;
   stockQuantity: number;
   isActive: boolean;
+  imagePath: string | null;
 };
 
 type Paginated<T> = {
@@ -60,10 +62,26 @@ export async function fetchAdminCategory(
   return parseApiResponse(response);
 }
 
+export async function uploadAdminImage(
+  file: File,
+  folder: "products" | "categories",
+): Promise<{ path: string }> {
+  const body = new FormData();
+  body.set("file", file);
+  body.set("folder", folder);
+  const response = await fetch("/api/admin/uploads", {
+    method: "POST",
+    credentials: "include",
+    body,
+  });
+  return parseApiResponse(response);
+}
+
 export async function createAdminCategory(input: {
   name: string;
   description: string | null;
   sortOrder: number;
+  imagePath?: string | null;
 }): Promise<{ category: AdminCategory }> {
   const response = await fetch("/api/admin/categories", jsonInit("POST", input));
   return parseApiResponse(response);
@@ -75,6 +93,7 @@ export async function updateAdminCategory(
     name: string;
     description: string | null;
     sortOrder: number;
+    imagePath?: string | null;
   },
 ): Promise<{ category: AdminCategory }> {
   const response = await fetch(
@@ -125,6 +144,7 @@ export async function createAdminProduct(input: {
   priceMinor: number;
   currency: string;
   stockQuantity: number;
+  imagePath?: string | null;
 }): Promise<{ product: AdminProduct }> {
   const response = await fetch("/api/admin/products", jsonInit("POST", input));
   return parseApiResponse(response);
@@ -139,6 +159,7 @@ export async function updateAdminProduct(
     priceMinor: number;
     currency: string;
     stockQuantity: number;
+    imagePath?: string | null;
   },
 ): Promise<{ product: AdminProduct }> {
   const response = await fetch(
