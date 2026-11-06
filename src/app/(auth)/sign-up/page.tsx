@@ -1,11 +1,11 @@
 import { AuthForm } from "@/features/auth/auth-form";
-
-export const instant = false;
 import { firstQueryValue, signInHref } from "@/lib/return-to";
 import { redirectIfAuthenticated } from "@/server/auth/protect";
 import { Card } from "@/ui/card";
 import { PageShell } from "@/ui/page-shell";
 import { TextLink } from "@/ui/text-link";
+
+export const instant = false;
 
 export default async function SignUpPage({
   searchParams,

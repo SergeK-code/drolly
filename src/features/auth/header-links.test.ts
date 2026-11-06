@@ -5,6 +5,7 @@ describe("headerLinks", () => {
   it("shows catalog and auth entry points for guests", () => {
     expect(headerLinks(null).map((link) => link.label)).toEqual([
       "Catalog",
+      "Cart",
       "Sign in",
       "Create account",
     ]);
@@ -12,13 +13,14 @@ describe("headerLinks", () => {
 
   it("shows account but not admin for customers", () => {
     expect(headerLinks({ role: "customer" }).map((link) => link.label)).toEqual(
-      ["Catalog", "Account"],
+      ["Catalog", "Cart", "Account"],
     );
   });
 
   it("adds admin for administrators", () => {
     expect(headerLinks({ role: "admin" }).map((link) => link.href)).toEqual([
       "/",
+      "/cart",
       "/account",
       "/admin",
     ]);

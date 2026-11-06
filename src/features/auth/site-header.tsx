@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { useSession } from "@/features/auth/hooks";
 import { headerLinks } from "@/features/auth/header-links";
 import { SignOutButton } from "@/features/auth/sign-out-button";
+import { cartItemCount } from "@/features/cart/cart-state";
+import { useCart } from "@/features/cart/cart-store";
 import { TextLink } from "@/ui/text-link";
 
 export function SiteHeader() {
@@ -15,18 +17,43 @@ export function SiteHeader() {
 
   return (
     <HeaderBar>
-      {links.map((link) => (
-        <TextLink
-          key={link.href}
-          href={link.href}
-          className="min-h-11 inline-flex items-center"
-        >
-          {link.label}
-        </TextLink>
-      ))}
+      {links.map((link) =>
+        link.href === "/cart" ? (
+          <CartHeaderLink key={link.href} href={link.href} label={link.label} />
+        ) : (
+          <TextLink
+            key={link.href}
+            href={link.href}
+            className="min-h-11 inline-flex items-center"
+          >
+            {link.label}
+          </TextLink>
+        ),
+      )}
       {user ? <SignOutButton variant="nav" /> : null}
     </HeaderBar>
   );
+}
+
+function CartHeaderLink({ href, label }: { href: string; label: string }) {
+  const items = useCart((state) => state.items);
+  const hydrated = useSyncExternalStore(
+    subscribeCartHydration,
+    () => useCart.persist.hasHydrated(),
+    () => false,
+  );
+  const count = hydrated ? cartItemCount(items) : 0;
+
+  return (
+    <TextLink href={href} className="min-h-11 inline-flex items-center">
+      {label}
+      {count > 0 ? ` (${count})` : ""}
+    </TextLink>
+  );
+}
+
+function subscribeCartHydration(onChange: () => void): () => void {
+  return useCart.persist.onFinishHydration(onChange);
 }
 
 function HeaderBar({ children }: { children: ReactNode }) {

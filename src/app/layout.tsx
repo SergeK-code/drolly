@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { CartDrawer } from "@/features/cart/cart-drawer";
 import { SiteHeader } from "@/features/auth/site-header";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -16,7 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Drolly",
-  description: "Single-store shop for browsing products and placing cash-on-delivery orders.",
+  description:
+    "Single-store shop for browsing products and placing cash-on-delivery orders.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -28,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex h-full flex-col overflow-hidden">
         <Providers>
           <SiteHeader />
+          <CartDrawer />
           <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         </Providers>
       </body>

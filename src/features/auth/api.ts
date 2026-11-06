@@ -15,6 +15,7 @@ export async function registerAccount(input: {
   const response = await fetch("/api/auth/register", {
     method: "POST",
     credentials: "include",
+    cache: "no-store",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(input),
   });
@@ -29,6 +30,7 @@ export async function signInAccount(input: { email: string; password: string }) 
   const response = await fetch("/api/auth/sign-in", {
     method: "POST",
     credentials: "include",
+    cache: "no-store",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(input),
   });
@@ -41,6 +43,7 @@ export const sessionQueryKey = ["auth", "session"] as const;
 export async function fetchSession(): Promise<{ user: PublicUser | null }> {
   const response = await fetch("/api/auth/session", {
     credentials: "include",
+    cache: "no-store",
   });
 
   return parseApiResponse(response);
@@ -50,6 +53,7 @@ export async function signOutAccount() {
   const response = await fetch("/api/auth/sign-out", {
     method: "POST",
     credentials: "include",
+    cache: "no-store",
     headers: { "content-type": "application/json" },
     body: "{}",
   });

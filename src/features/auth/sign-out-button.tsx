@@ -26,7 +26,7 @@ export function SignOutButton({
     try {
       await signOutAccount();
       queryClient.clear();
-      router.push(withNotice("/sign-in", "signed-out"));
+      router.replace(withNotice("/sign-in", "signed-out"));
       router.refresh();
     } catch (signOutError) {
       showToast(

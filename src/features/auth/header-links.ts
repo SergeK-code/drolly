@@ -8,7 +8,10 @@ export type HeaderLink = {
 };
 
 export function headerLinks(user: HeaderUser | null): HeaderLink[] {
-  const links: HeaderLink[] = [{ href: "/", label: "Catalog" }];
+  const links: HeaderLink[] = [
+    { href: "/", label: "Catalog" },
+    { href: "/cart", label: "Cart" },
+  ];
 
   if (!user) {
     links.push(

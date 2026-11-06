@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -30,26 +30,33 @@ export function AuthForm({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { showToast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
   const [pending, setPending] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  useEffect(() => {
+    formRef.current?.reset();
+  }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setFieldErrors({});
 
-    const form = new FormData(event.currentTarget);
-    const email = String(form.get("email") ?? "");
-    const password = String(form.get("password") ?? "");
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const email = String(data.get("email") ?? "");
+    const password = String(data.get("password") ?? "");
 
     try {
       let user: PublicUser | null = null;
 
       if (mode === "sign-up") {
-        const fullName = String(form.get("fullName") ?? "");
+        const fullName = String(data.get("fullName") ?? "");
         const result = await registerAccount({ fullName, email, password });
 
         if (result.confirmationRequired) {
+          form.reset();
           showToast(
             "success",
             "Check your email to confirm the account, then sign in.",
@@ -63,6 +70,8 @@ export function AuthForm({
         const result = await signInAccount({ email, password });
         user = result.user;
       }
+
+      form.reset();
 
       if (!user) {
         showToast("error", "Sign in to continue.");
@@ -91,7 +100,13 @@ export function AuthForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full flex-col gap-4" noValidate>
+    <form
+      ref={formRef}
+      onSubmit={onSubmit}
+      className="flex w-full flex-col gap-4"
+      autoComplete="off"
+      noValidate
+    >
       {mode === "sign-up" ? (
         <Field
           id="fullName"
@@ -101,7 +116,7 @@ export function AuthForm({
           <Input
             id="fullName"
             name="fullName"
-            autoComplete="name"
+            autoComplete="off"
             required
             disabled={pending}
           />
@@ -113,7 +128,7 @@ export function AuthForm({
           id="email"
           name="email"
           type="email"
-          autoComplete="email"
+          autoComplete="off"
           required
           disabled={pending}
         />
@@ -124,7 +139,7 @@ export function AuthForm({
           id="password"
           name="password"
           type="password"
-          autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
+          autoComplete="off"
           required
           minLength={mode === "sign-up" ? 8 : undefined}
           disabled={pending}

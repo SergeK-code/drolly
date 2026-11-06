@@ -11,6 +11,7 @@ import {
   useCategoriesQuery,
   useProductListQuery,
 } from "@/features/catalog/hooks";
+import { AddToCartButton } from "@/features/cart/add-to-cart-button";
 import type { PublicProduct } from "@/features/catalog/api";
 import { catalogImageUrl } from "@/lib/catalog-media";
 import { Button } from "@/ui/button";
@@ -149,7 +150,10 @@ export function CatalogBrowser() {
       ) : null}
 
       {productsQuery.isPending ? (
-        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+        <ul
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          aria-busy="true"
+        >
           <li className="h-64 rounded-lg bg-border/70" />
           <li className="h-64 rounded-lg bg-border/70" />
           <li className="hidden h-64 rounded-lg bg-border/70 lg:block" />
@@ -231,24 +235,31 @@ function ProductCard({
 }) {
   return (
     <Card hover className="h-full overflow-hidden p-0">
-      <Link
-        href={`/products/${product.slug}`}
-        className="flex h-full flex-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        <MediaImage
-          src={catalogImageUrl(product.slug, product.imagePath)}
-          alt=""
-          className="aspect-[4/3] w-full"
-        />
-        <div className="flex flex-1 flex-col gap-1 p-4">
-          <h2 className="text-base font-semibold leading-snug">{product.name}</h2>
-          <p className="text-sm text-muted">{product.categoryName}</p>
-          <p className="mt-auto pt-2 text-sm font-medium">{price}</p>
-          {product.stockQuantity <= 0 ? (
-            <p className="text-xs text-muted">Out of stock</p>
-          ) : null}
+      <article className="flex h-full flex-col">
+        <Link
+          href={`/products/${product.slug}`}
+          className="flex flex-1 flex-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <MediaImage
+            src={catalogImageUrl(product.slug, product.imagePath)}
+            alt=""
+            className="aspect-[4/3] w-full"
+          />
+          <div className="flex flex-1 flex-col gap-1 p-4">
+            <h2 className="text-base font-semibold leading-snug">
+              {product.name}
+            </h2>
+            <p className="text-sm text-muted">{product.categoryName}</p>
+            <p className="mt-auto pt-2 text-sm font-medium">{price}</p>
+            {product.stockQuantity <= 0 ? (
+              <p className="text-xs text-muted">Out of stock</p>
+            ) : null}
+          </div>
+        </Link>
+        <div className="px-4 pb-4">
+          <AddToCartButton product={product} className="w-full" />
         </div>
-      </Link>
+      </article>
     </Card>
   );
 }

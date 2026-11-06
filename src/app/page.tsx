@@ -11,8 +11,8 @@ export default function Home() {
             Drolly
           </h1>
           <p className="max-w-prose text-sm leading-6 text-muted sm:text-base sm:leading-7">
-            Browse active products. Cash on delivery checkout comes in a later
-            phase.
+            Browse products, add them to your cart, and pay cash on delivery at
+            checkout.
           </p>
         </div>
       </header>
