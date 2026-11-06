@@ -1,4 +1,4 @@
-import { parseApiResponse } from "@/lib/api";
+import { parseApiResponse } from "@/lib/ui/api";
 import type { QueryClient } from "@tanstack/react-query";
 
 export type PublicStoreSettings = {

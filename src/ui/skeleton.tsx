@@ -1,4 +1,4 @@
-import { cx } from "@/ui/cx";
+import { cx } from "@/lib/ui/cx";
 
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cx("skeleton rounded-md", className)} />;

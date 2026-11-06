@@ -1,4 +1,4 @@
-import { CartView } from "@/features/cart/cart-view";
+import { CartView } from "@/ui/cart/cart-view";
 import { PageShell } from "@/ui/page-shell";
 import { BackLink } from "@/ui/text-link";
 

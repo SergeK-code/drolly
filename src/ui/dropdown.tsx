@@ -10,9 +10,9 @@ import {
   type KeyboardEvent,
 } from "react";
 import { createPortal } from "react-dom";
-import { cx } from "@/ui/cx";
+import { cx } from "@/lib/ui/cx";
 import { controlClassName } from "@/ui/input";
-import { overlayFade, motionTransition } from "@/ui/motion";
+import { overlayFade, motionTransition } from "@/lib/ui/motion";
 import { useSafeReducedMotion } from "@/ui/use-safe-reduced-motion";
 
 export type DropdownOption<T extends string = string> = {

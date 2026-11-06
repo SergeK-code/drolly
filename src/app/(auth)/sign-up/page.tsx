@@ -1,4 +1,4 @@
-import { AuthForm } from "@/features/auth/auth-form";
+import { AuthForm } from "@/ui/auth/auth-form";
 import { firstQueryValue, signInHref } from "@/lib/return-to";
 import { redirectIfAuthenticated } from "@/server/auth/protect";
 import { Card } from "@/ui/card";

@@ -1,4 +1,4 @@
-import { parseApiResponse } from "@/lib/api";
+import { parseApiResponse } from "@/lib/ui/api";
 
 export type PublicCategory = {
   id: string;

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { AppError } from "@/server/http/api";
-import { resetEnvCache } from "@/lib/env";
+import { resetEnvCache } from "@/lib/server/env";
 import { assertSameOrigin } from "@/server/http/assert-same-origin";
 
 const ORIGINAL_URL = process.env.SUPABASE_URL;

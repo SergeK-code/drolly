@@ -1,4 +1,4 @@
-import { getEnv } from "@/lib/env";
+import { getEnv } from "@/lib/server/env";
 import { forbidden } from "@/server/http/api";
 
 export function assertSameOrigin(request: Request): void {

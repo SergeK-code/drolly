@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { CartDrawer } from "@/features/cart/cart-drawer";
-import { SiteHeader } from "@/features/auth/site-header";
+import { CartDrawer } from "@/ui/cart/cart-drawer";
+import { SiteHeader } from "@/ui/auth/site-header";
 import { StorefrontChrome } from "@/ui/storefront-chrome";
 import { Providers } from "./providers";
 import "./globals.css";

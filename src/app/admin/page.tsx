@@ -1,4 +1,4 @@
-import { AdminDashboard } from "@/features/admin-dashboard/dashboard";
+import { AdminDashboard } from "@/ui/admin-dashboard/dashboard";
 
 export const instant = false;
 

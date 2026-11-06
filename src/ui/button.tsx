@@ -3,8 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { cx } from "@/ui/cx";
-import { tapHover } from "@/ui/motion";
+import { cx } from "@/lib/ui/cx";
+import { tapHover } from "@/lib/ui/motion";
 import { useSafeReducedMotion } from "@/ui/use-safe-reduced-motion";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";

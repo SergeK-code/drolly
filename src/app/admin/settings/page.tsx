@@ -1,4 +1,4 @@
-import { StoreSettingsForm } from "@/features/admin-settings/settings-form";
+import { StoreSettingsForm } from "@/ui/admin-settings/settings-form";
 
 export const instant = false;
 

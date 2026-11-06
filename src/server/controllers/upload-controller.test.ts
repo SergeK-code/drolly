@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { resetEnvCache } from "@/lib/env";
+import { resetEnvCache } from "@/lib/server/env";
 
 const { uploadAdminCatalogImage } = vi.hoisted(() => ({
   uploadAdminCatalogImage: vi.fn(),

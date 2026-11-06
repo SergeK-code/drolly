@@ -6,7 +6,7 @@ import {
   registerUser,
   signInUser,
   signOutUser,
-} from "@/server/auth/auth-service";
+} from "@/server/services/auth-service";
 import { authRateLimiter } from "@/server/auth/auth-limiter";
 import {
   registerSchema,

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cx } from "@/ui/cx";
+import { cx } from "@/lib/ui/cx";
 import { PageEnter } from "@/ui/page-enter";
 import { SiteFooter } from "@/ui/site-footer";
 

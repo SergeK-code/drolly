@@ -1,4 +1,4 @@
-import { OrderList } from "@/features/orders/order-list";
+import { OrderList } from "@/ui/orders/order-list";
 
 export const instant = false;
 

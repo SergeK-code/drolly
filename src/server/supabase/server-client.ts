@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { getEnv } from "@/lib/env";
+import { getEnv } from "@/lib/server/env";
 import { supabaseCookieOptions } from "@/server/supabase/cookie-options";
 import type { Database } from "@/server/supabase/database.types";
 

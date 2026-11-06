@@ -1,9 +1,9 @@
 import { catalogQueryKey } from "@/features/catalog/query-keys";
 import { adminCatalogQueryKey } from "@/features/admin-catalog/query-keys";
-import { parseApiResponse } from "@/lib/api";
+import { parseApiResponse } from "@/lib/ui/api";
 import type { QueryClient } from "@tanstack/react-query";
 
-export { ApiError as AdminApiError } from "@/lib/api";
+export { ApiError as AdminApiError } from "@/lib/ui/api";
 
 export type AdminCategory = {
   id: string;

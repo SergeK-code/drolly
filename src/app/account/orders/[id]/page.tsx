@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { OrderDetail } from "@/features/orders/order-detail";
+import { OrderDetail } from "@/ui/orders/order-detail";
 import { BackLink } from "@/ui/text-link";
 
 export const instant = false;

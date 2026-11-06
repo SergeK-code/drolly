@@ -11,8 +11,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { fadeSlide, motionTransition } from "@/ui/motion";
-import { cx } from "@/ui/cx";
+import { fadeSlide, motionTransition } from "@/lib/ui/motion";
+import { cx } from "@/lib/ui/cx";
 import { useSafeReducedMotion } from "@/ui/use-safe-reduced-motion";
 
 type ToastTone = "success" | "error";

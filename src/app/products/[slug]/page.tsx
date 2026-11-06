@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ProductDetail } from "@/features/catalog/product-detail";
+import { ProductDetail } from "@/ui/catalog/product-detail";
 import { PageShell } from "@/ui/page-shell";
 import { BackLink } from "@/ui/text-link";
 

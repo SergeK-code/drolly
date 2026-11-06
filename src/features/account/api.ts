@@ -1,4 +1,4 @@
-import { parseApiResponse } from "@/lib/api";
+import { parseApiResponse } from "@/lib/ui/api";
 import { sessionQueryKey } from "@/features/auth/api";
 import { ordersQueryKey } from "@/features/orders/api";
 import type { QueryClient } from "@tanstack/react-query";

@@ -1,4 +1,4 @@
-import { CategoryTable } from "@/features/admin-catalog/category-table";
+import { CategoryTable } from "@/ui/admin-catalog/category-table";
 
 export const instant = false;
 

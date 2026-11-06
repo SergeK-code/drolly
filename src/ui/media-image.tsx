@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { ImageOff } from "lucide-react";
-import { cx } from "@/ui/cx";
+import { cx } from "@/lib/ui/cx";
 import { Icon } from "@/ui/icon";
 
 export function MediaImage({

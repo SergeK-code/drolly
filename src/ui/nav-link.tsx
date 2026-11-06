@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
-import { cx } from "@/ui/cx";
+import { cx } from "@/lib/ui/cx";
 
 export type NavMatch = "exact" | "prefix";
 export type NavTone = "header" | "footer" | "sidebar" | "segment" | "tab";

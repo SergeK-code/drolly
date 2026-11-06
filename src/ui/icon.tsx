@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { useSyncExternalStore } from "react";
-import { cx } from "@/ui/cx";
+import { cx } from "@/lib/ui/cx";
 
 function subscribe(): () => void {
   return () => {};

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cx } from "@/ui/cx";
+import { cx } from "@/lib/ui/cx";
 
 type Tone = "neutral" | "accent" | "success" | "warning" | "danger";
 

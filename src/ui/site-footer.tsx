@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@/features/auth/hooks";
-import { AuthActions } from "@/features/auth/auth-actions";
-import { headerLinks } from "@/features/auth/header-links";
+import { AuthActions } from "@/ui/auth/auth-actions";
+import { headerLinks } from "@/lib/ui/header-links";
 import { usePublicStoreSettingsQuery } from "@/features/store/hooks";
 import { NavLink } from "@/ui/nav-link";
 

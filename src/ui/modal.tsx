@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/ui/button";
-import { fadeSlide, motionTransition, overlayFade } from "@/ui/motion";
+import { fadeSlide, motionTransition, overlayFade } from "@/lib/ui/motion";
 import { useSafeReducedMotion } from "@/ui/use-safe-reduced-motion";
 
 export function Modal({

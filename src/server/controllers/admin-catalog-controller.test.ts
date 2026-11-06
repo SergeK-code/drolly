@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppError } from "@/server/http/api";
-import { resetEnvCache } from "@/lib/env";
+import { resetEnvCache } from "@/lib/server/env";
 
 const {
   createAdminCategory,

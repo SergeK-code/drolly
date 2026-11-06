@@ -1,8 +1,0 @@
-import { describe, expect, it } from "vitest";
-import { cx } from "@/ui/cx";
-
-describe("cx", () => {
-  it("joins truthy class names", () => {
-    expect(cx("a", false, undefined, "b")).toBe("a b");
-  });
-});

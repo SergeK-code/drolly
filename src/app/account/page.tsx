@@ -1,4 +1,4 @@
-import { ProfileForm } from "@/features/account/profile-form";
+import { ProfileForm } from "@/ui/account/profile-form";
 
 export const instant = false;
 

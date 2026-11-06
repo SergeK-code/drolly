@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { ProtectedPage } from "@/server/auth/protect";
-import { AdminShell } from "@/features/admin/admin-shell";
+import { AdminShell } from "@/ui/admin/admin-shell";
 
 export const instant = false;
 

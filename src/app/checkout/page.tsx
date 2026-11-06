@@ -1,4 +1,4 @@
-import { CheckoutForm } from "@/features/checkout/checkout-form";
+import { CheckoutForm } from "@/ui/checkout/checkout-form";
 import { ProtectedPage } from "@/server/auth/protect";
 import { PageShell } from "@/ui/page-shell";
 import { BackLink } from "@/ui/text-link";

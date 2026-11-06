@@ -1,6 +1,6 @@
 import { adminCatalogQueryKey } from "@/features/admin-catalog/query-keys";
 import { catalogQueryKey } from "@/features/catalog/query-keys";
-import { parseApiResponse } from "@/lib/api";
+import { parseApiResponse } from "@/lib/ui/api";
 import type { OrderStatusCode } from "@/lib/order-status";
 import type { QueryClient } from "@tanstack/react-query";
 
@@ -91,22 +91,6 @@ export async function createAddress(input: {
   return parseApiResponse(response);
 }
 
-export async function placeOrder(input: {
-  idempotencyKey: string;
-  items: { productId: string; quantity: number }[];
-  addressId?: string;
-  address?: {
-    recipientName: string;
-    phone: string;
-    addressLine: string;
-    area: string;
-    notes?: string | null;
-  };
-}): Promise<{ order: PublicOrder }> {
-  const response = await fetch("/api/checkout", jsonInit("POST", input));
-  return parseApiResponse(response);
-}
-
 export async function fetchOrders(page = 1): Promise<PaginatedOrders> {
   const params = new URLSearchParams({ limit: "12", page: String(page) });
   const response = await fetch(`/api/orders?${params.toString()}`, {
@@ -124,34 +108,6 @@ export async function fetchOrder(id: string): Promise<{ order: PublicOrder }> {
   return parseApiResponse(response);
 }
 
-export async function fetchAdminOrders(input?: {
-  page?: number;
-  status?: string;
-}): Promise<PaginatedOrders> {
-  const params = new URLSearchParams({ limit: "12" });
-  if (input?.page) {
-    params.set("page", String(input.page));
-  }
-  if (input?.status) {
-    params.set("status", input.status);
-  }
-  const response = await fetch(`/api/admin/orders?${params.toString()}`, {
-    credentials: "include",
-    cache: "no-store",
-  });
-  return parseApiResponse(response);
-}
-
-export async function fetchAdminOrder(
-  id: string,
-): Promise<{ order: PublicOrder }> {
-  const response = await fetch(`/api/admin/orders/${id}`, {
-    credentials: "include",
-    cache: "no-store",
-  });
-  return parseApiResponse(response);
-}
-
 export async function cancelOwnOrder(
   id: string,
 ): Promise<{ order: PublicOrder }> {
@@ -160,17 +116,6 @@ export async function cancelOwnOrder(
     credentials: "include",
     cache: "no-store",
   });
-  return parseApiResponse(response);
-}
-
-export async function updateAdminOrderStatus(
-  id: string,
-  status: OrderStatusCode,
-): Promise<{ order: PublicOrder }> {
-  const response = await fetch(
-    `/api/admin/orders/${id}/status`,
-    jsonInit("PATCH", { status }),
-  );
   return parseApiResponse(response);
 }
 

@@ -1,4 +1,4 @@
-import { ProductTable } from "@/features/admin-catalog/product-table";
+import { ProductTable } from "@/ui/admin-catalog/product-table";
 
 export const instant = false;
 

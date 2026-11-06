@@ -1,4 +1,4 @@
-import { AddressBook } from "@/features/account/address-book";
+import { AddressBook } from "@/ui/account/address-book";
 
 export const instant = false;
 

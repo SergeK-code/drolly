@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { ChevronLeft } from "lucide-react";
-import { cx } from "@/ui/cx";
+import { cx } from "@/lib/ui/cx";
 import { Icon } from "@/ui/icon";
 
 export function TextLink({

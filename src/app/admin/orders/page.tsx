@@ -1,4 +1,4 @@
-import { AdminOrderTable } from "@/features/admin-orders/order-table";
+import { AdminOrderTable } from "@/ui/admin-orders/order-table";
 
 export const instant = false;
 
